@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane fx:id="main3" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.StatisticController">
+    <children>
+        <LineChart fx:id="activityChart" layoutX="89.0" layoutY="20.0" prefHeight="361.0" prefWidth="485.0">
+            <xAxis><NumberAxis label="Data Distortion %"/></xAxis>
+            <yAxis><NumberAxis label="Errors %"/></yAxis>
+        </LineChart>
+        <Button fx:id="red" layoutX="23.0" layoutY="55.0" mnemonicParsing="false" onAction="#buildStatistic"
+                prefHeight="56.0"
+                 prefWidth="56.0" text="" />
+    </children>
+</Pane>
