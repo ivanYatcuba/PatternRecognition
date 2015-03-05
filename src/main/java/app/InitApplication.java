@@ -19,7 +19,7 @@ public class InitApplication extends Application {
     @Override
     public void start(final Stage stage) throws Exception {
         IController controller = SpringFXMLLoader.load("/fxml/main.fxml");
-        Parent parent =  (Parent) controller.getView();
+        Parent parent = (Parent) controller.getView();
 
         Scene scene = new Scene(parent);
         stage.setTitle("Pattern Recognition");

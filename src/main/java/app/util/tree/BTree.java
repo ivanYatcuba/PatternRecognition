@@ -1,4 +1,4 @@
-package app.util;
+package app.util.tree;
 
 public class BTree<T> {
     private AbstractNode<T> root;

@@ -2,19 +2,13 @@ package app.recognition.impl;
 
 import app.backend.model.Pattern;
 import app.recognition.Recognizer;
-import app.util.AbstractNode;
-import app.util.BTree;
-import app.util.BitUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import app.util.tree.AbstractNode;
+import app.util.tree.BTree;
+import app.util.pattern.BitUtil;
 
 import java.util.*;
 
-@Component
 public class CFourFive implements Recognizer {
-
-    @Autowired
-    private BitUtil bitUtil;
 
     private List<Pattern> benchmarks;
     private List<Pattern> trainSet;
@@ -22,29 +16,35 @@ public class CFourFive implements Recognizer {
 
     private BTree<Pattern> classificationTree;
 
-    @Override
-    public Pattern recognize(final Pattern input) {
-        return recognizeR((ClassificationNode<Pattern>)classificationTree.getRoot(), input);
+    public CFourFive(List<Pattern> benchmarks, List<Pattern> trainSet, int attributesCount) {
+        this.benchmarks = benchmarks;
+        this.trainSet = trainSet;
+        this.attributesCount = attributesCount;
     }
 
-    private Pattern recognizeR(ClassificationNode<Pattern> currentNode, Pattern pattern){
+    @Override
+    public Pattern recognize(final Pattern input) {
+        return recognizeR((ClassificationNode)classificationTree.getRoot(), input);
+    }
+
+    private Pattern recognizeR(ClassificationNode currentNode, Pattern pattern){
         if(currentNode.getData() != null){
             return  currentNode.getData();
         }
-        if(bitUtil.bitIsSet(pattern.getData()[currentNode.getByteId()], currentNode.getBitId())){
-            return recognizeR((ClassificationNode<Pattern>)currentNode.getrNode(), pattern);
+        if(BitUtil.bitIsSet(pattern.getData()[currentNode.getByteId()], currentNode.getBitId())){
+            return recognizeR((ClassificationNode)currentNode.getrNode(), pattern);
         }else {
-            return recognizeR((ClassificationNode<Pattern>)currentNode.getlNode(), pattern);
+            return recognizeR((ClassificationNode)currentNode.getlNode(), pattern);
         }
     }
 
     @Override
     public void init(){
-        classificationTree = new BTree(new ClassificationNode<Pattern>());
-        buildTreeR((ClassificationNode<Pattern>)classificationTree.getRoot(), trainSet);
+        classificationTree = new BTree(new ClassificationNode());
+        buildTreeR((ClassificationNode)classificationTree.getRoot(), trainSet);
     }
 
-    private void buildTreeR(ClassificationNode<Pattern> currentNode, List<Pattern> currentSet){
+    private void buildTreeR(ClassificationNode currentNode, List<Pattern> currentSet){
         for(Pattern p: benchmarks) {
             if(getFrequency(p, currentSet) == currentSet.size()){
                 currentNode.setData(p);return;
@@ -58,7 +58,7 @@ public class CFourFive implements Recognizer {
                 List<Pattern> lList = new ArrayList<>();
                 List<Pattern> rList = new ArrayList<>();
                 for(Pattern p: currentSet) {
-                    if(bitUtil.bitIsSet(p.getData()[i], j)){rList.add(p);}
+                    if(BitUtil.bitIsSet(p.getData()[i], j)){rList.add(p);}
                     else{lList.add(p);}
                 }
                 long attributeIndex = (long)(i*10+j);
@@ -69,13 +69,13 @@ public class CFourFive implements Recognizer {
         double maxGain = Collections.max(gainMap.keySet());
         final long paramId = gainMap.get(maxGain);
         currentNode.setByteBitId((int)paramId/10, (int)paramId%10);
-        currentNode.setrNode(new ClassificationNode<Pattern>());
-        currentNode.setlNode(new ClassificationNode<Pattern>());
+        currentNode.setrNode(new ClassificationNode());
+        currentNode.setlNode(new ClassificationNode());
         if(attributeLists.get(paramId).getrList().size() != 0){
-            buildTreeR((ClassificationNode<Pattern>)currentNode.getrNode(), attributeLists.get(paramId).getrList());
+            buildTreeR((ClassificationNode)currentNode.getrNode(), attributeLists.get(paramId).getrList());
         }
         if(attributeLists.get(paramId).getlList().size() != 0){
-            buildTreeR((ClassificationNode<Pattern>)currentNode.getlNode(), attributeLists.get(paramId).getlList());
+            buildTreeR((ClassificationNode)currentNode.getlNode(), attributeLists.get(paramId).getlList());
         }
     }
 
@@ -106,7 +106,7 @@ public class CFourFive implements Recognizer {
         return result;
     }
 
-    private class ClassificationNode<T> extends AbstractNode<Pattern> {
+    private class ClassificationNode extends AbstractNode<Pattern> {
        private int byteId;
        private int bitId;
 
@@ -133,37 +133,14 @@ public class CFourFive implements Recognizer {
             return lList;
         }
 
-        public void setlList(final List<T> lList) {
-            this.lList = lList;
-        }
-
         public List<T> getrList() {
             return rList;
         }
-
-        public void setrList(final List<T> rList) {
-            this.rList = rList;
-        }
     }
 
-    public void setBenchmarks(final List<Pattern> benchmarks) {
-        this.benchmarks = benchmarks;
-    }
-
+    @Override
     public void setTrainSet(final List<Pattern> trainSet) {
         this.trainSet = trainSet;
-    }
-
-    public void setAttributesCount(final int attributesCount) {
-        this.attributesCount = attributesCount;
-    }
-
-    public BitUtil getBitUtil() {
-        return bitUtil;
-    }
-
-    public void setBitUtil(final BitUtil bitUtil) {
-        this.bitUtil = bitUtil;
     }
 
     @Override

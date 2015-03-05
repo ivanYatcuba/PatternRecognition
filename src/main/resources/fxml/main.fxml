@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.*?>
 
-<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.MainController">
+<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.MainController" fx:id="mainPane">
    <tabs>
       <Tab closable="false" text="Data">
          <content>

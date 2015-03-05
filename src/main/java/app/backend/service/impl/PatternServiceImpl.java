@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,7 +31,11 @@ public class PatternServiceImpl implements PatternService {
     @Override
     @Transactional
     public List<Pattern> getBenchmarks() {
-        return patternDAO.getBenchmarks();
+        List<Pattern> patterns = patternDAO.getBenchmarks();
+        if (patterns == null) {
+            patterns = new ArrayList<>();
+        }
+        return patterns;
     }
 
     @Override

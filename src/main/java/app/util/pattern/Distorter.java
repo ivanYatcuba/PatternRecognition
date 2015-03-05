@@ -1,7 +1,6 @@
-package app.util;
+package app.util.pattern;
 
 import app.backend.model.Pattern;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -10,9 +9,6 @@ import java.util.Random;
 
 @Component
 public class Distorter {
-
-    @Autowired
-    private BitUtil bitUtil;
 
     public List<Pattern> distort(Pattern p, int lim, int distRate){
         List<Pattern> results = new ArrayList<>();
@@ -24,7 +20,7 @@ public class Distorter {
                 nP.getData()[j] = p.getData()[j];
                 for(int k=0 ; k<8; k++) {
                     if(j>61 && rand.nextInt((100) + 1) >= 100-distRate){
-                        nP.getData()[j] = bitUtil.revertBit(nP.getData()[j], k);
+                        nP.getData()[j] = BitUtil.revertBit(nP.getData()[j], k);
                     }
                 }
             }

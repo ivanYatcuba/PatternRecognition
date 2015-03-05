@@ -3,12 +3,11 @@ package app.controller.impl;
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
 import app.controller.IController;
-import app.util.Distorter;
-import app.util.ImagePatternLoader;
+import app.util.pattern.Distorter;
+import app.util.pattern.ImagePatternLoader;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -38,23 +37,20 @@ public class DataController implements IController, Initializable {
     private ImagePatternLoader imagePatternLoader;
     @Autowired
     private Distorter distorter;
+    @Autowired
+    private MainController mainController;
 
     private Node view;
-
     final FileChooser fileChooser = new FileChooser();
 
     @FXML
     private ImageView img;
-
     @FXML
     private ComboBox<Pattern> patterns;
-
     @FXML
     private ListView<Pattern> distortedPatterns;
-
     @FXML
     private TextField number;
-
     @FXML
     private Slider distRate;
 
@@ -70,7 +66,7 @@ public class DataController implements IController, Initializable {
     }
 
     public void createNew() {
-        File file = fileChooser.showOpenDialog(view.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(mainController.getView().getScene().getWindow());
         if (file != null) {
             img.setImage(new Image(file.toURI().toString()));
 
@@ -96,13 +92,11 @@ public class DataController implements IController, Initializable {
                 System.out.println("Error =(");
             }
         }
-
-
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        img.setImage(new Image("img/empty.jpg"));
+        img.setImage(new Image("img/empty.png"));
         patterns.valueProperty().addListener(new ChangeListener<Pattern>() {
             @Override
             public void changed(ObservableValue<? extends Pattern> observable, Pattern oldValue, Pattern newValue) {
@@ -144,12 +138,14 @@ public class DataController implements IController, Initializable {
         try {
             int num = Integer.parseInt(number.getText());
             Pattern p = patterns.getSelectionModel().getSelectedItem();
-            List<Pattern> distortedData = distorter.distort(p, num, (int) distRate.getValue());
-            patternService.removeDistorted(p.getId());
-            for (Pattern dp : distortedData) {
-                patternService.save(dp);
+            if (p!=null) {
+                List<Pattern> distortedData = distorter.distort(p, num, (int) distRate.getValue());
+                patternService.removeDistorted(p.getId());
+                for (Pattern dp : distortedData) {
+                    patternService.save(dp);
+                }
+                distortedPatterns.setItems(FXCollections.observableArrayList(distortedData));
             }
-            distortedPatterns.setItems(FXCollections.observableArrayList(distortedData));
         } catch (Exception e) {
             e.printStackTrace();
         }

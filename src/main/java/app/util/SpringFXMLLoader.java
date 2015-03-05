@@ -31,8 +31,7 @@ public class SpringFXMLLoader {
                 }
             });
 
-
-            Node view = (Node) loader.load(fxmlStream);
+            Node view = loader.load(fxmlStream);
             IController controller = loader.getController();
             controller.setView(view);
 

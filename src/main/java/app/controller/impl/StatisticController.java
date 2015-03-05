@@ -7,7 +7,8 @@ import app.recognition.Recognizer;
 import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;
 import app.recognition.impl.SolutionTreeBagging;
-import app.util.Distorter;
+import app.util.RecognizerFactory;
+import app.util.pattern.Distorter;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -31,27 +32,15 @@ public class StatisticController implements IController, Initializable {
     @Autowired
     private PatternService patternService;
     @Autowired
-    private KNN knn;
-    @Autowired
-    private CFourFive cFourFive;
-    @Autowired
     private Distorter distorter;
     @Autowired
-    private SolutionTreeBagging solutionTreeBagging;
+    private RecognizerFactory recognizerFactory;
 
     @FXML
     private LineChart<Integer, Double> activityChart;
 
     private List<Pattern> patterns;
     private List<Pattern> trainSet;
-    @PostConstruct
-    public void init() {
-        patterns = patternService.getBenchmarks();
-        trainSet = patternService.getAll();
-    }
-
-
-
 
     @Override
     public Node getView() {
@@ -65,12 +54,17 @@ public class StatisticController implements IController, Initializable {
 
     public void buildStatistic() {
         activityChart.getData().retainAll();
-        prepareKNN();
-        prepareCFourFive();
-        prepareBagging();
-        activityChart.getData().add(buildSeries(knn, "KNN"));
-        activityChart.getData().add(buildSeries(cFourFive, "C4.5"));
-        activityChart.getData().add(buildSeries(solutionTreeBagging, "Bagging"));
+        patterns = patternService.getBenchmarks();
+        trainSet = patternService.getAll();
+        if(!patterns.isEmpty()) {
+            int attributesLength = patterns.get(0).getData().length;
+            KNN knn = recognizerFactory.getKNN(KNN_K, trainSet, patterns);
+            CFourFive cFourFive = recognizerFactory.getCFourFive(patterns, trainSet, attributesLength);
+            SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(patterns, trainSet, attributesLength);
+            activityChart.getData().add(buildSeries(knn, "KNN"));
+            activityChart.getData().add(buildSeries(cFourFive, "C4.5"));
+            activityChart.getData().add(buildSeries(solutionTreeBagging, "Bagging"));
+        }
     }
 
     private XYChart.Series<Integer, Double> buildSeries(Recognizer recognizer, String seriesName) {
@@ -78,7 +72,7 @@ public class StatisticController implements IController, Initializable {
         series.setName(seriesName);
         int errorsNum = 0;
         int distortionRate = 0;
-        List<Pattern> benchmarks = patternService.getBenchmarks();
+        List<Pattern> benchmarks = patterns;
         while (distortionRate <= 100) {
 
             List<Pattern> newTrainSet = new ArrayList<>();
@@ -93,36 +87,21 @@ public class StatisticController implements IController, Initializable {
                 List<Pattern> distortedData = distorter.distort(p, 10, distortionRate);
                 for (Pattern distortedPattern : distortedData) {
                     Pattern parent = recognizer.recognize(distortedPattern);
-                    if (p.getId() != parent.getId()) {errorsNum++;}
+                    if (p.getId() != parent.getId()) {
+                        errorsNum++;
+                    }
                 }
             }
-            series.getData().add(new XYChart.Data<>(distortionRate, ((double)errorsNum/(double)trainSet.size())
-              *100));
+            series.getData().add(new XYChart.Data<>
+                    (distortionRate, ((double)errorsNum/(double)trainSet.size()) *100));
             distortionRate += 5;
             errorsNum = 0;
         }
         return series;
     }
 
-    private void prepareKNN() {
-        knn.setK(KNN_K);
-        knn.setTrainSet(trainSet);
-    }
-
-    private void prepareCFourFive(){
-        cFourFive.setBenchmarks(patterns);
-        cFourFive.setTrainSet(trainSet);
-        cFourFive.setAttributesCount(patterns.get(0).getData().length);
-    }
-
-    private void prepareBagging(){
-        solutionTreeBagging.setBenchmarks(patterns);
-        solutionTreeBagging.setTrainSet(trainSet);
-        solutionTreeBagging.setAttributesCount(patterns.get(0).getData().length);
-    }
-
     @Override
     public void initialize(final URL url, final ResourceBundle resourceBundle) {
-        //buildStatistic();
+        buildStatistic();
     }
 }

@@ -1,43 +1,20 @@
 package app.recognition.impl;
 
 import app.backend.model.Pattern;
-import app.backend.service.PatternService;
 import app.recognition.Recognizer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component
 public class KNN implements Recognizer {
-
-    @Autowired
-    private PatternService patternService;
 
     private int k;
     private List<Pattern> trainSet;
+    private List<Pattern> benchmarks;
 
-    public KNN() {}
-
-    public KNN(final int k, final List<Pattern> trainSet) {
+    public KNN(int k, List<Pattern> trainSet, List<Pattern> benchmarks) {
         this.k = k;
         this.trainSet = trainSet;
-    }
-
-    public int getK() {
-        return k;
-    }
-
-    public void setK(final int k) {
-        this.k = k;
-    }
-
-    public List<Pattern> getTrainSet() {
-        return trainSet;
-    }
-
-    public void setTrainSet(final List<Pattern> trainSet) {
-        this.trainSet = trainSet;
+        this.benchmarks = benchmarks;
     }
 
     @Override
@@ -51,7 +28,7 @@ public class KNN implements Recognizer {
             Pattern closestPattern = null;
             Double minimalDistance =  Collections.min(distances.values());
             for(Pattern candidate: distances.keySet()){
-                if(distances.get(candidate) == minimalDistance){
+                if(Objects.equals(distances.get(candidate), minimalDistance)){
                     closestPattern=candidate;break;
                 }
             }
@@ -65,7 +42,7 @@ public class KNN implements Recognizer {
         int winner = Collections.max(patternVotes.values());
         for(Long p: patternVotes.keySet()) {
             if(patternVotes.get(p) == winner){
-                return patternService.findById(p);
+                return retrieveById(p);
             }
         }
         return null;
@@ -88,6 +65,20 @@ public class KNN implements Recognizer {
         distance = Math.sqrt(sum);
         return distance;
     }
+
+    private Pattern retrieveById(long id) {
+        for(Pattern p: benchmarks) {
+            if(p.getId() == id) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public void setTrainSet(final List<Pattern> trainSet) {
+        this.trainSet = trainSet;
+    }
+
     @Override
     public void init(){}
 

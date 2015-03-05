@@ -7,8 +7,9 @@ import app.recognition.Recognizer;
 import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;
 import app.recognition.impl.SolutionTreeBagging;
-import app.util.Distorter;
-import app.util.ImagePatternLoader;
+import app.util.pattern.Distorter;
+import app.util.pattern.ImagePatternLoader;
+import app.util.RecognizerFactory;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,6 +28,7 @@ import java.util.*;
 public class RecognitionController implements IController, Initializable {
 
     private static final int KNN_K = 3;
+    private static final String IMG_EMPTY_JPG = "img/empty.png";
     private Node view;
 
     @Autowired
@@ -34,31 +36,20 @@ public class RecognitionController implements IController, Initializable {
     @Autowired
     private ImagePatternLoader imagePatternLoader;
     @Autowired
-    private KNN knn;
-    @Autowired
-    private CFourFive cFourFive;
-    @Autowired
     private Distorter distorter;
     @Autowired
-    private SolutionTreeBagging solutionTreeBagging;
-
+    private RecognizerFactory recognizerFactory;
 
     @FXML
     private ImageView data_view;
-
     @FXML
     private ImageView recognized_view;
-
     @FXML
     private Slider distRate;
-
     @FXML
     private ComboBox<Pattern> patterns;
-
     @FXML
     private ComboBox<Recognizer> methods;
-
-
 
     @Override
     public Node getView() {
@@ -72,41 +63,32 @@ public class RecognitionController implements IController, Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        data_view.setImage(new Image("img/empty.jpg"));
-        recognized_view.setImage(new Image("img/empty.jpg"));
-        patterns.setItems(FXCollections.observableArrayList(patternService.getBenchmarks()));
-        patterns.getSelectionModel().select(0);
-        prepareKNN();
-        prepareCFourFive();
-        prepareBagging();
-        methods.setItems(FXCollections.observableArrayList(Arrays.asList(knn, cFourFive, solutionTreeBagging)));
-        methods.getSelectionModel().select(0);
-        generateAndRecognize();
+        data_view.setImage(new Image(IMG_EMPTY_JPG));
+        recognized_view.setImage(new Image(IMG_EMPTY_JPG));
+        List<Pattern> benchmarks = patternService.getBenchmarks();
+        if (!benchmarks.isEmpty()) {
+            patterns.setItems(FXCollections.observableArrayList(benchmarks));
+            patterns.getSelectionModel().select(0);
+            List<Pattern> trainSet = patternService.getAll();
+            int attributeLength = patterns.getSelectionModel().getSelectedItem().getData().length;
+            KNN knn = recognizerFactory.getKNN(KNN_K, trainSet, benchmarks);
+            CFourFive cFourFive = recognizerFactory.getCFourFive(benchmarks, trainSet, attributeLength);
+            SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(benchmarks, trainSet, attributeLength);
+            methods.setItems(FXCollections.observableArrayList(Arrays.asList(knn, cFourFive, solutionTreeBagging)));
+            methods.getSelectionModel().select(0);
+            generateAndRecognize();
+        }
     }
-
-    private void prepareKNN() {
-        knn.setK(KNN_K);
-        knn.setTrainSet(patternService.getAll());
-    }
-
-    private void prepareCFourFive(){
-        cFourFive.setBenchmarks(patterns.getItems());
-        cFourFive.setTrainSet(patternService.getAll());
-        cFourFive.setAttributesCount(patterns.getSelectionModel().getSelectedItem().getData().length);
-        cFourFive.init();
-    }
-
-    private void prepareBagging(){
-        solutionTreeBagging.setBenchmarks(patterns.getItems());
-        solutionTreeBagging.setTrainSet(patternService.getAll());
-        solutionTreeBagging.setAttributesCount(patterns.getSelectionModel().getSelectedItem().getData().length);
-        solutionTreeBagging.init();
-    }
-
 
     public void generateAndRecognize() {
-        Pattern p = patterns.getSelectionModel().getSelectedItem();
-        Pattern distorted = distorter.distort(p, 1, (int) distRate.getValue()).get(0);
+        Pattern pattern = patterns.getSelectionModel().getSelectedItem();
+        if(pattern != null) {
+            generateAndRecognizeAction(patterns.getSelectionModel().getSelectedItem());
+        }
+    }
+
+    private void generateAndRecognizeAction(Pattern selectedBenchmark) {
+        Pattern distorted = distorter.distort(selectedBenchmark, 1, (int) distRate.getValue()).get(0);
         Recognizer recognizer = methods.getValue();
         imagePatternLoader.loadPattern(distorted, data_view);
         imagePatternLoader.loadPattern(recognizer.recognize(distorted), recognized_view);

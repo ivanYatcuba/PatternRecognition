@@ -1,11 +1,6 @@
-#dataInput{
-    -fx-background-image: url("../img/bg.jpg");
-}
-#recognition{
-    -fx-background-image: url("../img/bg.jpg");
-}
-#statistic{
-    -fx-background-image: url("../img/bg.jpg");
+
+#mainPane{
+    -fx-background-color: lightgray;
 }
 #img{
     -fx-padding: 11;
