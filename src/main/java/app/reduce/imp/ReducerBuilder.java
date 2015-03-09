@@ -32,6 +32,11 @@ public class ReducerBuilder {
         return this;
     }
 
+    public ReducerBuilder setTrainSet(List<Pattern> trainSet) {
+        reduce.setTrainSet(trainSet);
+        return this;
+    }
+
     public Reduce build() {
         return reduce;
     }

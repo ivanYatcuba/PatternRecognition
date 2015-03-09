@@ -16,6 +16,8 @@ public class CFourFive implements Recognizer {
 
     private BTree<Pattern> classificationTree;
 
+    private int frequencyOffset = 0;
+
     public CFourFive(List<Pattern> benchmarks, List<Pattern> trainSet, int attributesCount) {
         this.benchmarks = benchmarks;
         this.trainSet = trainSet;
@@ -41,13 +43,18 @@ public class CFourFive implements Recognizer {
     @Override
     public void init(){
         classificationTree = new BTree(new ClassificationNode());
-        buildTreeR((ClassificationNode)classificationTree.getRoot(), trainSet);
+        if(trainSet.size() > attributesCount * 8) {
+            frequencyOffset = trainSet.size() - (attributesCount * 8);
+        }
+
+        buildTreeR((ClassificationNode) classificationTree.getRoot(), trainSet);
     }
 
-    private void buildTreeR(ClassificationNode currentNode, List<Pattern> currentSet){
+    private ClassificationNode buildTreeR(ClassificationNode currentNode, List<Pattern> currentSet){
         for(Pattern p: benchmarks) {
-            if(getFrequency(p, currentSet) == currentSet.size()){
-                currentNode.setData(p);return;
+            if(getFrequency(p, currentSet) >= currentSet.size()){
+                currentNode.setData(p);
+                return currentNode;
             }
         }
         Map<Double, Long> gainMap = new HashMap<>();
@@ -67,20 +74,30 @@ public class CFourFive implements Recognizer {
             }
         }
         double maxGain = Collections.max(gainMap.keySet());
+        if(maxGain == 0) {
+            for(Pattern p: benchmarks) {
+                if(p.getId() == currentSet.get(0).getParentId()){
+                    currentNode.setData(p);
+                    return currentNode;
+                }
+            }
+        }
         final long paramId = gainMap.get(maxGain);
         currentNode.setByteBitId((int)paramId/10, (int)paramId%10);
-        currentNode.setrNode(new ClassificationNode());
-        currentNode.setlNode(new ClassificationNode());
-        if(attributeLists.get(paramId).getrList().size() != 0){
+
+        if(attributeLists.get(paramId).getrList().size() != 0) {
+            currentNode.setrNode(new ClassificationNode());
             buildTreeR((ClassificationNode)currentNode.getrNode(), attributeLists.get(paramId).getrList());
         }
-        if(attributeLists.get(paramId).getlList().size() != 0){
-            buildTreeR((ClassificationNode)currentNode.getlNode(), attributeLists.get(paramId).getlList());
+        if(attributeLists.get(paramId).getlList().size() != 0) {
+            currentNode.setlNode(new ClassificationNode());
+            buildTreeR((ClassificationNode) currentNode.getlNode(), attributeLists.get(paramId).getlList());
         }
+        return new ClassificationNode();
     }
 
     private int getFrequency(Pattern benchmark, List<Pattern> patternList){
-        int frequency = 0;
+        int frequency = frequencyOffset;
         for(Pattern p: patternList) {
             if(p.getParentId() == benchmark.getId()){frequency++;}
         }

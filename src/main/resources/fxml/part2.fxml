@@ -14,5 +14,10 @@
             <fx:include fx:id="reduce" source="reduce.fxml"/>
         </content>
       </Tab>
+       <Tab closable="false" text="Reduce Statistic">
+           <content>
+               <fx:include fx:id="reduceStatistic" source="reduceStatistic.fxml"/>
+           </content>
+       </Tab>
    </tabs>
 </TabPane>

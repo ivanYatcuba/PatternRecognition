@@ -14,6 +14,7 @@ public interface Reduce {
     void setDistortionRate(int distortionRate);
     List<Integer> reduce ();
     List<Integer> getReduceResults();
+    void setTrainSet(List<Pattern> trainSet);
 
     static List<Pattern> reduceTrainSet(List<Pattern> trainSet, List<Integer> indexToRemove) {
         return trainSet.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getData(), indexToRemove))).collect(Collectors.toList());

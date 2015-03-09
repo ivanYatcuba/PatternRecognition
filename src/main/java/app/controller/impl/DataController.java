@@ -37,7 +37,9 @@ public class DataController extends AbstractFxmlController implements Initializa
     @Autowired
     private ImagePatternLoader imagePatternLoader;
     @Autowired
-    private FirstPartController classification;
+    private FirstPartController firstPartController;
+    @Autowired
+    private SecondPartController secondPartController;
 
     @FXML
     private ImageView img;
@@ -51,7 +53,13 @@ public class DataController extends AbstractFxmlController implements Initializa
     private Slider distRate;
 
     public void createNew() {
-        File file = fileChooser.showOpenDialog(classification.getView().getScene().getWindow());
+        File file;
+        if(firstPartController.getView() == null) {
+            file = fileChooser.showOpenDialog(secondPartController.getView().getScene().getWindow());
+        }else {
+            file = fileChooser.showOpenDialog(firstPartController.getView().getScene().getWindow());
+        }
+
         if (file != null) {
             img.setImage(new Image(file.toURI().toString()));
 

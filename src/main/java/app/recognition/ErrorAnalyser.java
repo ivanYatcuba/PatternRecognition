@@ -12,6 +12,11 @@ public class ErrorAnalyser {
 
     Recognizer recognizer;
     List<Pattern> benchmarks;
+    int distortionOffset = 61;
+
+    public void setDistortionOffset(int distortionOffset) {
+        this.distortionOffset = distortionOffset;
+    }
 
     public ErrorAnalyser(Recognizer recognizer, List<Pattern> benchmarks) {
         this.recognizer = recognizer;
@@ -26,7 +31,7 @@ public class ErrorAnalyser {
         int errorsNum = 0;
         Distorter distorter = new Distorter();
         if(trainSet == null) {
-            recognizer.setTrainSet(newTrainSet(benchmarks, distortionRate));
+            recognizer.setTrainSet(newTrainSet(benchmarks, distortionRate, distortionOffset));
         } else {
             recognizer.setTrainSet(trainSet);
         }
@@ -35,7 +40,7 @@ public class ErrorAnalyser {
         for (Pattern p : benchmarks) {
             List<Pattern> distortedData;
             if(testSet == null) {
-                distortedData = distorter.distort(p, 10, distortionRate);
+                distortedData = distorter.distort(p, 10, distortionRate, distortionOffset);
             } else {
                 distortedData = testSet.get(p);
             }
@@ -50,21 +55,21 @@ public class ErrorAnalyser {
         return errorsNum;
     }
 
-    public static List<Pattern> newTrainSet(List<Pattern> benchmarks, int distortionRate) {
+    public static List<Pattern> newTrainSet(List<Pattern> benchmarks, int distortionRate, int distortionOffset) {
         Distorter distorter = new Distorter();
         List<Pattern> newTrainSet = new ArrayList<>();
         for(Pattern p : benchmarks){
-            List<Pattern> distortedData = distorter.distort(p, 10, distortionRate);
+            List<Pattern> distortedData = distorter.distort(p, 10, distortionRate, distortionOffset);
             newTrainSet.addAll(distortedData);
         }
         return newTrainSet;
     }
 
-    public static Map<Pattern, List<Pattern>> newTestSet(List<Pattern> benchmarks, int distortionRate) {
+    public static Map<Pattern, List<Pattern>> newTestSet(List<Pattern> benchmarks, int distortionRate, int distortionOffset) {
         Distorter distorter = new Distorter();
         Map<Pattern, List<Pattern>> train = new HashMap<>();
         for(Pattern p: benchmarks) {
-            train.put(p, distorter.distort(p, 10, distortionRate));
+            train.put(p, distorter.distort(p, 10, distortionRate, distortionOffset));
         }
         return train;
     }
