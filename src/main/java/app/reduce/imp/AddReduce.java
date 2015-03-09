@@ -9,7 +9,7 @@ import javafx.concurrent.Task;
 
 import java.util.*;
 
-public class AddReduce extends Task<Void> implements Reduce {
+public class AddReduce extends Task<List<Pattern>> implements Reduce {
 
     private List<Pattern> benchmarks;
     private int sizeOfNewParamList;
@@ -17,7 +17,7 @@ public class AddReduce extends Task<Void> implements Reduce {
 
 
     @Override
-    public List<Pattern> reduce() {
+    public List<Integer> reduce() {
         int benchmarkDataLength = benchmarks.get(0).getData().length;
         if (benchmarkDataLength < sizeOfNewParamList) {
             throw new IllegalArgumentException("n cannot be greater than num of params");
@@ -43,7 +43,12 @@ public class AddReduce extends Task<Void> implements Reduce {
             Pattern pattern = benchmark.copy(ByteUtil.removeListOfIndexes(benchmark.getData(), paramsToRemoveIndexes));
             newBenchmarks.add(pattern);
         }
-        return newBenchmarks;
+        return paramsToRemoveIndexes;
+    }
+
+    @Override
+    public List<Integer> getReduceResults() {
+        return null;
     }
 
     private List<Pattern> getModifiedBenchmarks(List<Pattern> benchmarks, int removeParam) {
@@ -85,7 +90,7 @@ public class AddReduce extends Task<Void> implements Reduce {
     }
 
     @Override
-    protected Void call() throws Exception {
+    protected List<Pattern> call() throws Exception {
         reduce();
         return null;
     }

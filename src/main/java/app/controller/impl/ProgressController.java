@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ProgressController extends AbstractFxmlController {
 
+
     @FXML
     private ProgressBar progress;
     @FXML
@@ -21,14 +22,11 @@ public class ProgressController extends AbstractFxmlController {
         progress.setProgress(0);
         progress.progressProperty().bind(task.progressProperty());
         progressLabel.textProperty().bind(task.messageProperty());
-        progress.progressProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                if (task.getWorkDone() >= task.getTotalWork()) {
-                    progress.progressProperty().unbind();
-                    task.cancel();
-                    ((Stage) getView().getScene().getWindow()).close();
-                }
+        progress.progressProperty().addListener((observableValue, number, number2) -> {
+            if (task.getWorkDone() >= task.getTotalWork()) {
+                progress.progressProperty().unbind();
+                task.cancel();
+                ((Stage) getView().getScene().getWindow()).close();
             }
         });
     }

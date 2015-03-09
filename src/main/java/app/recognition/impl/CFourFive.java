@@ -53,7 +53,7 @@ public class CFourFive implements Recognizer {
         Map<Double, Long> gainMap = new HashMap<>();
         Map<Long, ListTuple<Pattern>> attributeLists = new HashMap<>();
         double info = getInfo(currentSet);
-        for(int i = 62; i < attributesCount; i++){
+        for(int i = 0; i < attributesCount; i++){
             for(int j=0; j<8; j++){
                 List<Pattern> lList = new ArrayList<>();
                 List<Pattern> rList = new ArrayList<>();

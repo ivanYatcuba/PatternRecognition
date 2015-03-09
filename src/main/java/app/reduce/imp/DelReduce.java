@@ -8,22 +8,24 @@ import app.util.ByteUtil;
 import javafx.concurrent.Task;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class DelReduce extends Task<Void> implements Reduce {
+public class DelReduce extends Task<List<Pattern>> implements Reduce {
 
     private List<Pattern> benchmarks;
     private int sizeOfNewParamList;
     private int distortionRate;
 
+    List<Integer> results;
 
     @Override
-    public List<Pattern> reduce() {
+    public List<Integer> reduce() {
         int benchmarkDataLength = benchmarks.get(0).getData().length;
         if (benchmarkDataLength < sizeOfNewParamList) {
             throw new IllegalArgumentException("n cannot be greater than num of params");
         }
-        List<Integer> paramsToRemoveIndexes = new ArrayList<>();
-        while (paramsToRemoveIndexes.size() < sizeOfNewParamList) {
+        Set<Integer> paramsToRemoveIndexes = new HashSet<>();
+        while (paramsToRemoveIndexes.size() < sizeOfNewParamList && sizeOfNewParamList > 0) {
             Map<Integer, Integer> delMap = new HashMap<>();
             for(int i=0; i < benchmarkDataLength; i++) {
                 if (!paramsToRemoveIndexes.contains(i)) {
@@ -38,20 +40,21 @@ public class DelReduce extends Task<Void> implements Reduce {
             updateProgress(paramsToRemoveIndexes.size(), sizeOfNewParamList);
             updateMessage(String.valueOf(paramsToRemoveIndexes.size()));
         }
-        List<Pattern> newBenchmarks = new ArrayList<>();
-        for(Pattern benchmark: benchmarks) {
-            Pattern pattern = benchmark.copy(ByteUtil.removeListOfIndexes(benchmark.getData(), paramsToRemoveIndexes));
-            newBenchmarks.add(pattern);
+        if(sizeOfNewParamList <= 0) {
+            updateProgress(sizeOfNewParamList, sizeOfNewParamList);
+            updateMessage(String.valueOf(paramsToRemoveIndexes.size()));
         }
-        return newBenchmarks;
+        results = new ArrayList<>(paramsToRemoveIndexes);
+        return results;
+    }
+
+    @Override
+    public List<Integer> getReduceResults() {
+        return results;
     }
 
     private List<Pattern> getModifiedBenchmarks(List<Pattern> benchmarks, int removeParam) {
-        List<Pattern> modifiedBenchmarks = new ArrayList<>();
-        for(Pattern benchmark: benchmarks) {
-            modifiedBenchmarks.add(benchmark.copy(ByteUtil.remove(benchmark.getData(), removeParam)));
-        }
-        return modifiedBenchmarks;
+        return benchmarks.stream().map(benchmark -> benchmark.copy(ByteUtil.remove(benchmark.getData(), removeParam))).collect(Collectors.toList());
     }
 
     private Integer detectMin(Map<Integer, Integer> map) {
@@ -85,8 +88,8 @@ public class DelReduce extends Task<Void> implements Reduce {
     }
 
     @Override
-    protected Void call() throws Exception {
+    protected List<Pattern> call() throws Exception {
         reduce();
-        return null;
+        return  null;
     }
 }

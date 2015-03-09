@@ -4,6 +4,7 @@ import app.backend.model.Pattern;
 import app.recognition.Recognizer;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SolutionTreeBagging implements Recognizer {
 
@@ -57,11 +58,7 @@ public class SolutionTreeBagging implements Recognizer {
     private List<Pattern> generateSubList(List<Pattern> originalList){
         List<Pattern> patterns = new ArrayList<>();
         Random rand = new Random();
-        for(Pattern p: originalList){
-            if(rand.nextInt((100) + 1) <= SUBSET_SIZE){
-                patterns.add(p);
-            }
-        }
+        patterns.addAll(originalList.stream().filter(p -> rand.nextInt((100) + 1) <= SUBSET_SIZE).collect(Collectors.toList()));
         return patterns;
     }
 

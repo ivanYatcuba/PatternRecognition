@@ -3,13 +3,15 @@ package app.controller.impl;
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
 import app.controller.FxmlController;
+import app.recognition.ErrorAnalyser;
+import app.recognition.impl.CFourFive;
+import app.recognition.impl.KNN;
+import app.recognition.impl.SolutionTreeBagging;
 import app.reduce.Reduce;
 import app.reduce.imp.AddReduce;
 import app.reduce.imp.DelReduce;
 import app.reduce.imp.ReducerBuilder;
 import app.util.SpringFXMLLoader;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -28,15 +30,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 @Controller
 public class ReduceController extends AbstractFxmlController implements Initializable {
 
-    private static String NEW_PROPERTY_COUNT = "New Property Count:";
-    private static String DISTORTION_RATE = "Distortion Rate:";
+    private static final String NEW_PROPERTY_COUNT = "New Property Count:";
+    private static final String DISTORTION_RATE = "Distortion Rate:";
+    private static final String KNN = "KNN";
+    private static final String C4_5 = "C4.5";
+    private static final String SOLUTION_TREE_BAGGING = "Solution Tree Bagging";
 
     @Autowired
     private SecondPartController secondPartController;
@@ -64,17 +67,11 @@ public class ReduceController extends AbstractFxmlController implements Initiali
         reducers.setItems(FXCollections.observableArrayList(reduces));
         reducers.getSelectionModel().select(0);
         propCount.setMax(patternService.getDataSize());
-        propCount.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                propLabel.textProperty().setValue(NEW_PROPERTY_COUNT + String.valueOf((int) propCount.getValue()));
-            }
+        propCount.valueProperty().addListener((observable, oldValue, newValue) -> {
+            propLabel.textProperty().setValue(NEW_PROPERTY_COUNT + String.valueOf((int) propCount.getValue()));
         });
-        distortionRate.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                distLabel.textProperty().setValue(DISTORTION_RATE + String.valueOf((int) distortionRate.getValue()));
-            }
+        distortionRate.valueProperty().addListener((observable, oldValue, newValue) -> {
+            distLabel.textProperty().setValue(DISTORTION_RATE + String.valueOf((int) distortionRate.getValue()));
         });
     }
 
@@ -84,16 +81,49 @@ public class ReduceController extends AbstractFxmlController implements Initiali
                 setSizeOfNewParamList((int)propCount.getValue());
         Reduce reduce = reducerBuilder.build();
         Task task = (Task)reduce;
+        task.setOnSucceeded(event -> buildReduceResults(((Reduce)event.getSource()).getReduceResults()));
         Thread t = new Thread(task);
         getProgressWindow().bind(task);
         t.start();
     }
 
-    public void buildReduceResults(List<Pattern> modifiedPatterns) {
-        XYChart.Series origin = new XYChart.Series();
-        origin.setName("Origin");
-        origin.getData().add(new XYChart.Data(austria, 25601.34));
+    public void buildReduceResults(List<Integer> modifiedPatterns) {
+        results.getData().retainAll();
+        List<Pattern> benchmarks = patternService.getBenchmarks();
+        List<Pattern> trainSet = ErrorAnalyser.newTrainSet(benchmarks, (int)distortionRate.getValue());
+        Map<Pattern, List<Pattern>> testSet = ErrorAnalyser.newTestSet(benchmarks, (int)distortionRate.getValue());
+        results.getData().add(buildSeries("Origin", benchmarks, trainSet, testSet));
+
+        trainSet = Reduce.reduceTrainSet(trainSet, modifiedPatterns);
+        testSet = Reduce.reduceTestSet(testSet, modifiedPatterns);
+        List<Pattern> newBenchmark = new ArrayList<>(testSet.keySet());
+        results.getData().add(buildSeries("Modified", newBenchmark, trainSet, testSet));
+
     }
+
+    private XYChart.Series<String, Number> buildSeries(String name, List<Pattern> patterns, List<Pattern> trainSet,
+                                                       Map<Pattern, List<Pattern>> testSet) {
+        int distortionRate = (int) this.distortionRate.getValue();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        int dataSize = patterns.get(0).getData().length;
+        int errorSize;
+        series.setName(name);
+
+        ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, null, patterns), patterns);
+        errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
+        series.getData().add(new XYChart.Data<>(KNN, errorSize));
+
+
+        errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, null, dataSize), patterns);
+        errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
+        series.getData().add(new XYChart.Data<>(C4_5, errorSize));
+
+        errorAnalyser = new ErrorAnalyser(new SolutionTreeBagging(patterns, null, dataSize), patterns);
+        errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
+        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, errorSize));
+        return  series;
+    }
+
 
     private ProgressController getProgressWindow() {
         Stage stage = new Stage();

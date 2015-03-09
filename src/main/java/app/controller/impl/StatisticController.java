@@ -8,7 +8,6 @@ import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;
 import app.recognition.impl.SolutionTreeBagging;
 import app.util.RecognizerFactory;
-import app.util.pattern.Distorter;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 

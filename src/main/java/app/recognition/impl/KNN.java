@@ -59,7 +59,7 @@ public class KNN implements Recognizer {
         else{
             count = x.length;
         }
-        for (int i =61; i < count; i++){
+        for (int i =0; i < count; i++){
             sum = sum + Math.pow(Math.abs(x[i] - y[i]),2);
         }
         distance = Math.sqrt(sum);
