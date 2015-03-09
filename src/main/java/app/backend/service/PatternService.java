@@ -12,4 +12,5 @@ public interface PatternService {
     public List<Pattern> getChildrenPatterns(long id);
     public Pattern findById(long id);
     public void removeDistorted(long id);
+    int getDataSize();
 }

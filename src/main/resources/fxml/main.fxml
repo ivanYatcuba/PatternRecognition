@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.MainController" fx:id="mainPane">
-   <tabs>
-      <Tab closable="false" text="Data">
-         <content>
-             <fx:include fx:id="dataInput" source="dataImport.fxml"/>
-         </content>
-      </Tab>
-      <Tab closable="false" text="Recognition">
-        <content>
-            <fx:include fx:id="recognition" source="recognition.fxml"/>
-        </content>
-      </Tab>
-      <Tab closable="false" text="Statistic">
-        <content>
-            <fx:include fx:id="statistic" source="statistic.fxml"/>
-        </content>
-      </Tab>
-   </tabs>
-</TabPane>
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="282.0" prefWidth="416.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.MainController">
+   <children>
+      <Button fx:id="sem1" layoutX="78.0" layoutY="149.0" mnemonicParsing="false" onAction="#openFirstPart" prefHeight="78.0" prefWidth="253.0" text="Sem1" />
+      <Button fx:id="sem2" layoutX="78.0" layoutY="48.0" mnemonicParsing="false" onAction="#openSecondPart" prefHeight="78.0" prefWidth="253.0" text="Sem2" />
+   </children>
+</Pane>

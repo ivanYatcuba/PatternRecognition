@@ -35,4 +35,14 @@ public class Pattern {
     public String toString() {
         return name;
     }
+
+    public Pattern copy(byte[] data) {
+        Pattern copy = new Pattern();
+        copy.id = this.id;
+        copy.isBenchmark = this.isBenchmark;
+        copy.data = data;
+        copy.name = this.name;
+        copy.parentId = this.parentId;
+        return copy;
+    }
 }

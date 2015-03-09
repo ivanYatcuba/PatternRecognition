@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Component
 public class Distorter {
 
     public List<Pattern> distort(Pattern p, int lim, int distRate){

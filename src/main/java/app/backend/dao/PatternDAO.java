@@ -13,4 +13,5 @@ public interface PatternDAO {
     public List<Pattern> getChildrenPatterns(long id);
     public void removePattern(Pattern p);
     public Pattern findById(long id);
+    int getDataSize();
 }

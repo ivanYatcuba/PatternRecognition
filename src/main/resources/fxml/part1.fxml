@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<TabPane fx:id="mainPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.FirstPartController">
+   <tabs>
+      <Tab closable="false" text="Data">
+         <content>
+             <fx:include fx:id="dataInput" source="dataImport.fxml" />
+         </content>
+      </Tab>
+      <Tab closable="false" text="Recognition">
+        <content>
+            <fx:include fx:id="recognition" source="recognition.fxml" />
+        </content>
+      </Tab>
+      <Tab closable="false" text="Statistic">
+        <content>
+            <fx:include fx:id="statistic" source="statistic.fxml" />
+        </content>
+      </Tab>
+   </tabs>
+</TabPane>

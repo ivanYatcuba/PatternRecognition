@@ -3,6 +3,7 @@ package app.util;
 
 
 import app.controller.*;
+import app.controller.impl.AbstractFxmlController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.util.Callback;
@@ -14,10 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class SpringFXMLLoader {
+
     private static Logger LOG = Logger.getLogger(SpringFXMLLoader.class);
     private static final ApplicationContext APPLICATION_CONTEXT = new ClassPathXmlApplicationContext("/spring-config.xml");
 
-    public static IController load(String url){
+    public static FxmlController load(String url){
 
         InputStream fxmlStream = null;
         try {
@@ -32,7 +34,7 @@ public class SpringFXMLLoader {
             });
 
             Node view = loader.load(fxmlStream);
-            IController controller = loader.getController();
+            AbstractFxmlController controller = loader.getController();
             controller.setView(view);
 
             return controller;

@@ -1,6 +1,7 @@
 package app.backend.dao.impl;
 import app.backend.dao.PatternDAO;
 import app.backend.model.*;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,15 @@ public class PatternDAOImpl implements PatternDAO {
     @Override
     public Pattern findById(final long id) {
         return (Pattern)sessionFactory.getCurrentSession().get(Pattern.class, id);
+    }
+
+    @Override
+    public int getDataSize() {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Pattern.class);
+        criteria.setFirstResult(0);
+        criteria.setMaxResults(1);
+        Pattern pattern = (Pattern)criteria.list().get(0);
+        return pattern.getData().length;
     }
 
 

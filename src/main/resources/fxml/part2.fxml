@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+
+<TabPane  xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.SecondPartController" fx:id="mainPane">
+   <tabs>
+      <Tab closable="false" text="Data">
+         <content>
+             <fx:include fx:id="dataInput" source="dataImport.fxml"/>
+         </content>
+      </Tab>
+      <Tab closable="false" text="Param Reduce">
+        <content>
+            <fx:include fx:id="reduce" source="reduce.fxml"/>
+        </content>
+      </Tab>
+   </tabs>
+</TabPane>

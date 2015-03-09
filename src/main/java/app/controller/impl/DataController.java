@@ -2,7 +2,6 @@ package app.controller.impl;
 
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
-import app.controller.IController;
 import app.util.pattern.Distorter;
 import app.util.pattern.ImagePatternLoader;
 import javafx.beans.value.ChangeListener;
@@ -10,7 +9,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
@@ -29,19 +27,17 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 @Controller
-public class DataController implements IController, Initializable {
+public class DataController extends AbstractFxmlController implements Initializable {
+
+    private Distorter distorter = new Distorter();
+    final FileChooser fileChooser = new FileChooser();
 
     @Autowired
     private PatternService patternService;
     @Autowired
     private ImagePatternLoader imagePatternLoader;
     @Autowired
-    private Distorter distorter;
-    @Autowired
-    private MainController mainController;
-
-    private Node view;
-    final FileChooser fileChooser = new FileChooser();
+    private FirstPartController classification;
 
     @FXML
     private ImageView img;
@@ -54,19 +50,8 @@ public class DataController implements IController, Initializable {
     @FXML
     private Slider distRate;
 
-
-    @Override
-    public Node getView() {
-        return view;
-    }
-
-    @Override
-    public void setView(Node view) {
-        this.view = view;
-    }
-
     public void createNew() {
-        File file = fileChooser.showOpenDialog(mainController.getView().getScene().getWindow());
+        File file = fileChooser.showOpenDialog(classification.getView().getScene().getWindow());
         if (file != null) {
             img.setImage(new Image(file.toURI().toString()));
 

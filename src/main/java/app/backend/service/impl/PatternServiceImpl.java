@@ -57,4 +57,15 @@ public class PatternServiceImpl implements PatternService {
             patternDAO.removePattern(p);
         }
     }
+
+    @Override
+    @Transactional
+    public int getDataSize() {
+        try {
+            return patternDAO.getDataSize();
+        } catch (Exception e) {
+            return 0;
+        }
+
+    }
 }

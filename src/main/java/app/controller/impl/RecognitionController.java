@@ -2,7 +2,7 @@ package app.controller.impl;
 
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
-import app.controller.IController;
+import app.controller.FxmlController;
 import app.recognition.Recognizer;
 import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;
@@ -25,18 +25,16 @@ import java.net.URL;
 import java.util.*;
 
 @Controller
-public class RecognitionController implements IController, Initializable {
+public class RecognitionController extends AbstractFxmlController implements  Initializable {
 
     private static final int KNN_K = 3;
     private static final String IMG_EMPTY_JPG = "img/empty.png";
-    private Node view;
+    private Distorter distorter = new Distorter();
 
     @Autowired
     private PatternService patternService;
     @Autowired
     private ImagePatternLoader imagePatternLoader;
-    @Autowired
-    private Distorter distorter;
     @Autowired
     private RecognizerFactory recognizerFactory;
 
@@ -50,16 +48,6 @@ public class RecognitionController implements IController, Initializable {
     private ComboBox<Pattern> patterns;
     @FXML
     private ComboBox<Recognizer> methods;
-
-    @Override
-    public Node getView() {
-        return view;
-    }
-
-    @Override
-    public void setView(Node view) {
-        this.view = view;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

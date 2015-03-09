@@ -34,3 +34,21 @@
     -fx-text-fill: white;
     -fx-font-size: 12px;
 }
+
+#sem2 {
+    -fx-background-color:
+    #000000,linear-gradient(rgba(255, 0, 7, 0.92), #9a1800);
+    -fx-background-insets: 0,1,2,3;
+    -fx-background-radius: 3,2,2,2;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
+
+#sem2:hover {
+    -fx-background-color:
+    #000000,linear-gradient(rgba(255, 0, 7, 0.92), #f62a00);
+    -fx-background-insets: 0,1,2,3;
+    -fx-background-radius: 3,2,2,2;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
