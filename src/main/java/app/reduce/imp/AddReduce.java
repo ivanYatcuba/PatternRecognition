@@ -13,11 +13,11 @@ public class AddReduce extends AbstractSearchReduce {
     @Override
     protected List<Pattern> getModifiedBenchmarks(List<Pattern> benchmarks, Set<Integer> oldParams, int newParam) {
         ArrayList<Integer> params = new ArrayList<>();
-        for(int i=0; i<benchmarks.get(0).getData().length; i++) {
+        for(int i=0; i<benchmarks.get(0).getBitData().length; i++) {
             params.add(i);
         }
         params.removeAll(oldParams);
         params.remove(new Integer(newParam));
-        return benchmarks.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getData(), new ArrayList<>(params)))).collect(Collectors.toList());
+        return benchmarks.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getBitData(), new ArrayList<>(params)))).collect(Collectors.toList());
     }
 }

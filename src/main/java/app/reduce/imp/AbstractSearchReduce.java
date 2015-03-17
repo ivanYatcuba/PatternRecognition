@@ -6,10 +6,13 @@ import app.recognition.ErrorAnalyser;
 import app.recognition.impl.KNN;
 import app.reduce.Reduce;
 import javafx.concurrent.Task;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 
 public abstract class AbstractSearchReduce extends Task<List<Pattern>> implements Reduce {
+
+    private static final Logger LOG = Logger.getLogger(AbstractSearchReduce.class.getName());
 
     private List<Pattern> benchmarks;
     private List<Pattern> trainSet;
@@ -20,12 +23,15 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
 
     @Override
     public List<Integer> reduce() {
-        int benchmarkDataLength = benchmarks.get(0).getData().length;
+        int benchmarkDataLength = benchmarks.get(0).getData().length * 8;
         if (benchmarkDataLength < sizeOfNewParamList) {
             throw new IllegalArgumentException("n cannot be greater than num of params");
         }
         Set<Integer> paramsToRemoveIndexes = new HashSet<>();
+        LOG.debug("Starting reduce...");
         while (paramsToRemoveIndexes.size() < sizeOfNewParamList && sizeOfNewParamList > 0) {
+            LOG.debug("Current number of params: " + paramsToRemoveIndexes.size());
+            LOG.debug("Current params list: " + paramsToRemoveIndexes);
             Map<Integer, Integer> delMap = new HashMap<>();
             for(int i=0; i < benchmarkDataLength; i++) {
                 if (!paramsToRemoveIndexes.contains(i)) {
@@ -35,15 +41,19 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
                     ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, newTrainSet, modifiedBenchmarks), modifiedBenchmarks);
                     errorAnalyser.setDistortionOffset(0);
                     delMap.put(i, delMap.get(i) + errorAnalyser.analise(distortionRate));
+                    LOG.debug("Param: " + i + " gives " + delMap.get(i) + " errors");
                 }
                 updateMessage("Attributes removed: " + paramsToRemoveIndexes.size() + " Scanning attribute: " + i);
             }
-            paramsToRemoveIndexes.add(detectMin(delMap));
+            int newIndex = detectMin(delMap);
+            paramsToRemoveIndexes.add(newIndex);
+            LOG.debug("New param found with index: " + newIndex + "! Error rate: " + delMap.get(newIndex));
             updateProgress(paramsToRemoveIndexes.size(), sizeOfNewParamList);
         }
         if(sizeOfNewParamList <= 0) {
             updateProgress(sizeOfNewParamList, sizeOfNewParamList);
         }
+        LOG.debug("Reduce finished resulted set: " + paramsToRemoveIndexes);
         results = new ArrayList<>(paramsToRemoveIndexes);
         return results;
     }

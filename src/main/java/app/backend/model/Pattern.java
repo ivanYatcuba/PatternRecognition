@@ -16,6 +16,13 @@ public class Pattern {
     @Column
     private Long parentId;
 
+    @Transient
+    private boolean[]  bitData;
+
+    public Pattern() {
+
+    }
+
     public long getId() {return id;}
     public void setId(long id) {this.id = id;}
 
@@ -31,18 +38,33 @@ public class Pattern {
     public Long getParentId() {return parentId;}
     public void setParentId(Long parentId) {this.parentId = parentId;}
 
+    public boolean[] getBitData() {
+        if (bitData == null) {
+            boolean[] bits = new boolean[data.length * 8];
+            for (int i = 0; i < data.length * 8; i++) {
+                if ((data[i / 8] & (1 << (7 - (i % 8)))) > 0)
+                    bits[i] = true;
+            }
+            bitData = bits;
+        }
+        return bitData;
+    }
+
+    public void setBitData(boolean[] bitData) {this.bitData = bitData;}
+
     @Override
     public String toString() {
         return name;
     }
 
-    public Pattern copy(byte[] data) {
+    public Pattern copy(boolean[] bitData) {
         Pattern copy = new Pattern();
         copy.id = this.id;
         copy.isBenchmark = this.isBenchmark;
-        copy.data = data;
+        copy.data = this.data;
         copy.name = this.name;
         copy.parentId = this.parentId;
+        copy.bitData = bitData;
         return copy;
     }
 }

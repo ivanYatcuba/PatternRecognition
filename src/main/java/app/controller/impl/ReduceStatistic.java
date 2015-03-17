@@ -46,7 +46,7 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
     @FXML
     private Label distLabel;
     @FXML
-    private LineChart<Integer, Integer> statisticChart;
+    private LineChart<Integer, Double> statisticChart;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -60,7 +60,7 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
     public void buildStatistic() {
         statisticChart.getData().retainAll();
         Task<Void> task = new Task<Void>() {
-            private List<XYChart.Series<Integer, Integer>> seriesList = new ArrayList<>();
+            private List<XYChart.Series<Integer, Double>> seriesList = new ArrayList<>();
 
             @Override
             protected void succeeded() {
@@ -78,7 +78,7 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
                 int maxOverview = dataSize*2;
                 int currentOverview = 1;
                 for (Class<? extends Reduce> r: classes) {
-                    XYChart.Series<Integer, Integer> series = new XYChart.Series<>();
+                    XYChart.Series<Integer, Double> series = new XYChart.Series<>();
                     series.setName(r.getSimpleName());
                     for(int i=1; i<dataSize; i++) {
                         ReducerBuilder reducerBuilder = new ReducerBuilder(r);
@@ -105,17 +105,17 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
         t.start();
     }
 
-    private void drawChart(List<XYChart.Series<Integer, Integer>> seriesList) {
-        for(XYChart.Series<Integer, Integer> series: seriesList) {
+    private void drawChart(List<XYChart.Series<Integer, Double>> seriesList) {
+        for(XYChart.Series<Integer, Double> series: seriesList) {
             statisticChart.getData().add(series);
         }
 
     }
 
-    private XYChart.Data<Integer, Integer> buildSeries(int paramCount, List<Pattern> patterns, List<Pattern> trainSet, Map<Pattern, List<Pattern>> testSet) {
+    private XYChart.Data<Integer, Double> buildSeries(int paramCount, List<Pattern> patterns, List<Pattern> trainSet, Map<Pattern, List<Pattern>> testSet) {
         ErrorAnalyser errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, trainSet, patterns.get(0).getData().length), patterns);
         int errorsNum = errorAnalyser.analise((int)distortionRate.getValue(), trainSet, testSet);
-        return new XYChart.Data<>(paramCount, errorsNum);
+        return new XYChart.Data<>(paramCount, (double)errorsNum/trainSet.size() *100);
     }
 
     private ProgressController getProgressWindow() {

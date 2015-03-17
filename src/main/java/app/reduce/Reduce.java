@@ -17,13 +17,13 @@ public interface Reduce {
     void setTrainSet(List<Pattern> trainSet);
 
     static List<Pattern> reduceTrainSet(List<Pattern> trainSet, List<Integer> indexToRemove) {
-        return trainSet.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getData(), indexToRemove))).collect(Collectors.toList());
+        return trainSet.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getBitData(), indexToRemove))).collect(Collectors.toList());
     }
 
     static Map<Pattern, List<Pattern>> reduceTestSet(Map<Pattern, List<Pattern>> testSet, List<Integer> indexToRemove) {
         Map<Pattern, List<Pattern>> reducedTestSet = new HashMap<>();
         for(Pattern parent: testSet.keySet()) {
-            Pattern newParent = parent.copy(ByteUtil.removeListOfIndexes(parent.getData(), indexToRemove));
+            Pattern newParent = parent.copy(ByteUtil.removeListOfIndexes(parent.getBitData(), indexToRemove));
             reducedTestSet.put(newParent, reduceTrainSet(testSet.get(parent), indexToRemove));
         }
         return reducedTestSet;

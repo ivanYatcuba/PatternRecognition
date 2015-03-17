@@ -58,7 +58,7 @@ public class RecognitionController extends AbstractFxmlController implements  In
             patterns.setItems(FXCollections.observableArrayList(benchmarks));
             patterns.getSelectionModel().select(0);
             List<Pattern> trainSet = patternService.getAll();
-            int attributeLength = patterns.getSelectionModel().getSelectedItem().getData().length;
+            int attributeLength = patterns.getSelectionModel().getSelectedItem().getBitData().length;
             KNN knn = recognizerFactory.getKNN(KNN_K, trainSet, benchmarks);
             CFourFive cFourFive = recognizerFactory.getCFourFive(benchmarks, trainSet, attributeLength);
             SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(benchmarks, trainSet, attributeLength);

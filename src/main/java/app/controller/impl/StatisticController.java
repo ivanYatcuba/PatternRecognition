@@ -40,7 +40,7 @@ public class StatisticController extends AbstractFxmlController implements Initi
         patterns = patternService.getBenchmarks();
         trainSet = patternService.getAll();
         if(!patterns.isEmpty()) {
-            int attributesLength = patterns.get(0).getData().length;
+            int attributesLength = patterns.get(0).getBitData().length;
             KNN knn = recognizerFactory.getKNN(KNN_K, trainSet, patterns);
             CFourFive cFourFive = recognizerFactory.getCFourFive(patterns, trainSet, attributesLength);
             SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(patterns, trainSet, attributesLength);

@@ -19,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
@@ -86,7 +87,7 @@ public class ReduceController extends AbstractFxmlController implements Initiali
         });
         reducers.setItems(FXCollections.observableArrayList(reduces));
         reducers.getSelectionModel().select(0);
-        dataSize = patternService.getDataSize();
+        dataSize = patternService.getDataSize()*8;
         propCount.setMax(dataSize);
         propCount.setMin(1);
         propCount.setValue(dataSize);
@@ -100,6 +101,8 @@ public class ReduceController extends AbstractFxmlController implements Initiali
         distLabel.textProperty().setValue(DISTORTION_RATE + String.valueOf((int) distortionRate.getValue()));
 
         benchmarks = patternService.getBenchmarks();
+        results.getYAxis().setAutoRanging(false);
+        ((NumberAxis)results.getYAxis()).setUpperBound(100);
     }
 
     public void startReduce() {
@@ -132,23 +135,23 @@ public class ReduceController extends AbstractFxmlController implements Initiali
                                                        Map<Pattern, List<Pattern>> testSet) {
         int distortionRate = (int) this.distortionRate.getValue();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        int dataSize = patterns.get(0).getData().length;
+        int dataSize = patterns.get(0).getBitData().length;
         int errorSize;
         series.setName(name);
 
         ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, null, patterns), patterns);
         errorAnalyser.setDistortionOffset(0);
         errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
-        series.getData().add(new XYChart.Data<>(KNN, errorSize));
+        series.getData().add(new XYChart.Data<>(KNN, ((double)errorSize/trainSet.size()) *100));
 
 
         errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, null, dataSize), patterns);
         errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
-        series.getData().add(new XYChart.Data<>(C4_5, errorSize));
+        series.getData().add(new XYChart.Data<>(C4_5, ((double)errorSize/trainSet.size()) *100));
 
         errorAnalyser = new ErrorAnalyser(new SolutionTreeBagging(patterns, null, dataSize), patterns);
         errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
-        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, errorSize));
+        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, ((double)errorSize/trainSet.size()) *100));
         return  series;
     }
 

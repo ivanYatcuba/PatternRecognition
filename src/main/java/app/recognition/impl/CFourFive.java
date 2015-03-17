@@ -33,7 +33,7 @@ public class CFourFive implements Recognizer {
         if(currentNode.getData() != null){
             return  currentNode.getData();
         }
-        if(BitUtil.bitIsSet(pattern.getData()[currentNode.getByteId()], currentNode.getBitId())){
+        if(pattern.getBitData()[currentNode.bitId]){
             return recognizeR((ClassificationNode)currentNode.getrNode(), pattern);
         }else {
             return recognizeR((ClassificationNode)currentNode.getlNode(), pattern);
@@ -43,8 +43,8 @@ public class CFourFive implements Recognizer {
     @Override
     public void init(){
         classificationTree = new BTree(new ClassificationNode());
-        if(trainSet.size() > attributesCount * 8) {
-            frequencyOffset = trainSet.size() - (attributesCount * 8);
+        if(trainSet.size() > attributesCount) {
+            frequencyOffset = trainSet.size() - (attributesCount );
         }
 
         buildTreeR((ClassificationNode) classificationTree.getRoot(), trainSet);
@@ -61,17 +61,15 @@ public class CFourFive implements Recognizer {
         Map<Long, ListTuple<Pattern>> attributeLists = new HashMap<>();
         double info = getInfo(currentSet);
         for(int i = 0; i < attributesCount; i++){
-            for(int j=0; j<8; j++){
                 List<Pattern> lList = new ArrayList<>();
                 List<Pattern> rList = new ArrayList<>();
                 for(Pattern p: currentSet) {
-                    if(BitUtil.bitIsSet(p.getData()[i], j)){rList.add(p);}
+                    if(p.getBitData()[i]){rList.add(p);}
                     else{lList.add(p);}
                 }
-                long attributeIndex = (long)(i*10+j);
+                long attributeIndex = (long)(i);
                 attributeLists.put(attributeIndex, new ListTuple<>(lList, rList));
                 gainMap.put(info - getInfoX(Arrays.asList(lList, rList), currentSet.size()), attributeIndex);
-            }
         }
         double maxGain = Collections.max(gainMap.keySet());
         if(maxGain == 0) {
@@ -83,7 +81,7 @@ public class CFourFive implements Recognizer {
             }
         }
         final long paramId = gainMap.get(maxGain);
-        currentNode.setByteBitId((int)paramId/10, (int)paramId%10);
+        currentNode.setByteBitId((int)paramId);
 
         if(attributeLists.get(paramId).getrList().size() != 0) {
             currentNode.setrNode(new ClassificationNode());
@@ -124,16 +122,11 @@ public class CFourFive implements Recognizer {
     }
 
     private class ClassificationNode extends AbstractNode<Pattern> {
-       private int byteId;
        private int bitId;
 
-        public void setByteBitId(int byteId, int bitId){
-            this.byteId = byteId;
+        public void setByteBitId(int bitId){
             this.bitId = bitId;
         }
-
-        public int getByteId() {return byteId;}
-        public int getBitId() {return bitId;}
     }
 
 

@@ -16,6 +16,6 @@ public class DelReduce extends AbstractSearchReduce {
     protected List<Pattern> getModifiedBenchmarks(List<Pattern> benchmarks, Set<Integer> oldParams, int removeParam) {
         ArrayList<Integer> params = new ArrayList<>(oldParams);
         params.add(removeParam);
-        return benchmarks.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getData(), new ArrayList<>(params)))).collect(Collectors.toList());
+        return benchmarks.stream().map(p -> p.copy(ByteUtil.removeListOfIndexes(p.getBitData(), new ArrayList<>(params)))).collect(Collectors.toList());
     }
 }
