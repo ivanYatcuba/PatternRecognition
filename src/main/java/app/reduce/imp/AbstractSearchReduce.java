@@ -28,14 +28,14 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
             throw new IllegalArgumentException("n cannot be greater than num of params");
         }
         Set<Integer> paramsToRemoveIndexes = new HashSet<>();
-        LOG.debug("Starting reduce...");
+        LOG.debug("Starting reduce..." + new Date());
         while (paramsToRemoveIndexes.size() < sizeOfNewParamList && sizeOfNewParamList > 0) {
             LOG.debug("Current number of params: " + paramsToRemoveIndexes.size());
             LOG.debug("Current params list: " + paramsToRemoveIndexes);
-            Map<Integer, Integer> delMap = new HashMap<>();
+            Map<Integer, Double> delMap = new HashMap<>();
             for(int i=0; i < benchmarkDataLength; i++) {
                 if (!paramsToRemoveIndexes.contains(i)) {
-                    delMap.put(i, 0);
+                    delMap.put(i, 0.0);
                     List<Pattern> modifiedBenchmarks = getModifiedBenchmarks(benchmarks, paramsToRemoveIndexes, i);
                     List<Pattern> newTrainSet = Reduce.reduceTrainSet(trainSet, new ArrayList<>(paramsToRemoveIndexes));
                     ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, newTrainSet, modifiedBenchmarks), modifiedBenchmarks);
@@ -70,8 +70,8 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
 
     protected abstract List<Pattern> getModifiedBenchmarks(List<Pattern> benchmarks, Set<Integer> oldParams, int newParam);
 
-    private Integer detectMin(Map<Integer, Integer> map) {
-        Integer min = Collections.min(map.values());
+    private Integer detectMin(Map<Integer, Double> map) {
+        Double min = Collections.min(map.values());
         for(int i: map.keySet()) {
             if(Objects.equals(map.get(i), min)) {
                 return i;

@@ -8,6 +8,7 @@ import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;
 import app.recognition.impl.SolutionTreeBagging;
 import app.util.RecognizerFactory;
+import app.util.pattern.Distorter;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
@@ -56,9 +57,7 @@ public class StatisticController extends AbstractFxmlController implements Initi
         int distortionRate = 0;
         ErrorAnalyser errorAnalyser = new ErrorAnalyser(recognizer, patterns);
         while (distortionRate <= 100) {
-            int errorsNum = errorAnalyser.analise(distortionRate);
-            series.getData().add(new XYChart.Data<>
-                    (distortionRate, ((double)errorsNum/(double)trainSet.size()) *100));
+            series.getData().add(new XYChart.Data(distortionRate, errorAnalyser.analise(distortionRate)));
             distortionRate += 5;
         }
         return series;

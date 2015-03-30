@@ -21,7 +21,7 @@ public class KNN implements Recognizer {
     public Pattern recognize(Pattern input) {
         Map<Pattern, Double> distances = new HashMap<>();
         for(Pattern p : trainSet) {
-            distances.put(p, euclideanDistance(input.getData(), p.getData()));
+            distances.put(p, euclideanDistance(input.getBitData(), p.getBitData()));
         }
         Map<Long, Integer> patternVotes = new HashMap<>();
         for(int i=0; i<k; i++){
@@ -48,7 +48,7 @@ public class KNN implements Recognizer {
         return null;
     }
 
-    private double euclideanDistance(byte[] x, byte[] y){
+    private double euclideanDistance(boolean[] x, boolean[] y){
         int count;
         double distance;
         double sum = 0.0;
@@ -60,7 +60,15 @@ public class KNN implements Recognizer {
             count = x.length;
         }
         for (int i =0; i < count; i++){
-            sum = sum + Math.pow(Math.abs(x[i] - y[i]),2);
+            int xi = 0;
+            int yi = 0;
+            if(x[i]) {
+                xi = 1;
+            }
+            if(y[i]) {
+                yi = 1;
+            }
+            sum = sum + Math.pow(Math.abs(xi - yi),2);
         }
         distance = Math.sqrt(sum);
         return distance;

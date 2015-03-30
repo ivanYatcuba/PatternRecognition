@@ -114,8 +114,7 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
 
     private XYChart.Data<Integer, Double> buildSeries(int paramCount, List<Pattern> patterns, List<Pattern> trainSet, Map<Pattern, List<Pattern>> testSet) {
         ErrorAnalyser errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, trainSet, patterns.get(0).getData().length), patterns);
-        int errorsNum = errorAnalyser.analise((int)distortionRate.getValue(), trainSet, testSet);
-        return new XYChart.Data<>(paramCount, (double)errorsNum/trainSet.size() *100);
+        return new XYChart.Data<>(paramCount, errorAnalyser.analise((int)distortionRate.getValue(), trainSet, testSet));
     }
 
     private ProgressController getProgressWindow() {

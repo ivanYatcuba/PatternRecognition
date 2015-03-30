@@ -141,17 +141,14 @@ public class ReduceController extends AbstractFxmlController implements Initiali
 
         ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, null, patterns), patterns);
         errorAnalyser.setDistortionOffset(0);
-        errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
-        series.getData().add(new XYChart.Data<>(KNN, ((double)errorSize/trainSet.size()) *100));
+        series.getData().add(new XYChart.Data<>(KNN,  errorAnalyser.analise(distortionRate, trainSet, testSet)));
 
 
         errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, null, dataSize), patterns);
-        errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
-        series.getData().add(new XYChart.Data<>(C4_5, ((double)errorSize/trainSet.size()) *100));
+        series.getData().add(new XYChart.Data<>(C4_5, errorAnalyser.analise(distortionRate, trainSet, testSet)));
 
         errorAnalyser = new ErrorAnalyser(new SolutionTreeBagging(patterns, null, dataSize), patterns);
-        errorSize = errorAnalyser.analise(distortionRate, trainSet, testSet);
-        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, ((double)errorSize/trainSet.size()) *100));
+        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, errorAnalyser.analise(distortionRate, trainSet, testSet)));
         return  series;
     }
 

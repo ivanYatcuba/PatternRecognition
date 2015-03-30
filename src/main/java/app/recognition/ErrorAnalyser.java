@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class ErrorAnalyser {
 
+    private static final int PROTOTYPE_COUNT=10;
     Recognizer recognizer;
     List<Pattern> benchmarks;
     int distortionOffset = 61;
@@ -23,11 +24,11 @@ public class ErrorAnalyser {
         this.benchmarks = benchmarks;
     }
 
-    public int analise(int distortionRate) {
+    public double analise(int distortionRate) {
         return analise(distortionRate, null, null);
     }
 
-    public int analise(int distortionRate, List<Pattern> trainSet, Map<Pattern, List<Pattern>> testSet) {
+    public double analise(int distortionRate, List<Pattern> trainSet, Map<Pattern, List<Pattern>> testSet) {
         int errorsNum = 0;
         Distorter distorter = new Distorter();
         if(trainSet == null) {
@@ -36,11 +37,12 @@ public class ErrorAnalyser {
             recognizer.setTrainSet(trainSet);
         }
 
+
         recognizer.init();
         for (Pattern p : benchmarks) {
             List<Pattern> distortedData;
             if(testSet == null) {
-                distortedData = distorter.distort(p, 10, distortionRate, distortionOffset);
+                distortedData = distorter.distort(p, PROTOTYPE_COUNT, distortionRate, distortionOffset);
             } else {
                 distortedData = testSet.get(p);
             }
@@ -52,7 +54,7 @@ public class ErrorAnalyser {
                 }
             }
         }
-        return errorsNum;
+        return (double)errorsNum/(PROTOTYPE_COUNT*benchmarks.size()) *100;
     }
 
     public static List<Pattern> newTrainSet(List<Pattern> benchmarks, int distortionRate, int distortionOffset) {
