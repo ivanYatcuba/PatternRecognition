@@ -1,7 +1,9 @@
-package app.controller.impl;
+package app.controller.impl.sem1;
 
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
+import app.controller.impl.AbstractFxmlController;
+import app.controller.impl.sem2.SecondPartController;
 import app.util.pattern.Distorter;
 import app.util.pattern.ImagePatternLoader;
 import javafx.beans.value.ChangeListener;

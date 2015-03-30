@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.*?>
 
-<TabPane  xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.SecondPartController" fx:id="mainPane">
+<TabPane  xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.sem2.SecondPartController" fx:id="mainPane">
    <tabs>
       <Tab closable="false" text="Data">
          <content>
@@ -17,6 +17,11 @@
        <Tab closable="false" text="Reduce Statistic">
            <content>
                <fx:include fx:id="reduceStatistic" source="reduceStatistic.fxml"/>
+           </content>
+       </Tab>
+       <Tab closable="false" text="Reduce Statistic">
+           <content>
+               <fx:include fx:id="e" source="dendragramm.fxml"/>
            </content>
        </Tab>
    </tabs>

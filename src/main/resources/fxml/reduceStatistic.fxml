@@ -5,7 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.ReduceStatistic">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.sem2.ReduceStatistic">
     <children>
         <Button layoutX="238.0" layoutY="11.0" mnemonicParsing="false" onAction="#buildStatistic" prefHeight="39.0" prefWidth="75.0" text="Start" />
         <Slider fx:id="distortionRate" layoutX="38.0" layoutY="35.0" prefHeight="15.0" prefWidth="180.0" />

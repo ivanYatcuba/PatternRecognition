@@ -5,7 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.ReduceController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.sem2.ReduceController">
    <children>
       <Button layoutX="426.0" layoutY="27.0" mnemonicParsing="false" onAction="#startReduce" prefHeight="39.0" prefWidth="75.0" text="Start" />
       <ComboBox fx:id="reducers" layoutX="27.0" layoutY="39.0" prefHeight="25.0" prefWidth="171.0" />

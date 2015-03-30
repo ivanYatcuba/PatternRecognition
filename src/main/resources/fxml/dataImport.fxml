@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 
-<Pane  xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.DataController" fx:id="main"
+<Pane  xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.sem1.DataController" fx:id="main"
       maxHeight="-Infinity" maxWidth="-Infinity"
       minHeight="-Infinity" minWidth="-Infinity"
       prefHeight="400.0" prefWidth="600.0">

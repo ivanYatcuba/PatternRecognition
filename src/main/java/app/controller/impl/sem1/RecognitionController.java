@@ -1,8 +1,9 @@
-package app.controller.impl;
+package app.controller.impl.sem1;
 
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
 import app.controller.FxmlController;
+import app.controller.impl.AbstractFxmlController;
 import app.recognition.Recognizer;
 import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;

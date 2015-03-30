@@ -1,12 +1,12 @@
-package app.controller.impl;
+package app.controller.impl.sem2;
 
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
 import app.controller.FxmlController;
+import app.controller.impl.AbstractFxmlController;
+import app.controller.impl.ProgressController;
 import app.recognition.ErrorAnalyser;
 import app.recognition.impl.CFourFive;
-import app.recognition.impl.KNN;
-import app.recognition.impl.SolutionTreeBagging;
 import app.reduce.Reduce;
 import app.reduce.imp.AddReduce;
 import app.reduce.imp.DelReduce;
