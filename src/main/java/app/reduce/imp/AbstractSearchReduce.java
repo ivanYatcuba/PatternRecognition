@@ -2,9 +2,13 @@ package app.reduce.imp;
 
 
 import app.backend.model.Pattern;
+import app.controller.impl.ProgressController;
 import app.recognition.ErrorAnalyser;
+import app.recognition.Recognizer;
 import app.recognition.impl.KNN;
 import app.reduce.Reduce;
+import app.util.TestSetFactory;
+import app.util.TrainSetFactory;
 import javafx.concurrent.Task;
 import org.apache.log4j.Logger;
 
@@ -13,48 +17,66 @@ import java.util.*;
 public abstract class AbstractSearchReduce extends Task<List<Pattern>> implements Reduce {
 
     private static final Logger LOG = Logger.getLogger(AbstractSearchReduce.class.getName());
+    private static final int PROTOTYPE_PER_PATTERN_SIZE = 10;
 
     private List<Pattern> benchmarks;
-    private List<Pattern> trainSet;
-    private int sizeOfNewParamList;
+    private int nParam;
     private int distortionRate;
+    private boolean isVisualizationEnabled = false;
+
+    private ProgressController progressController;
 
     List<Integer> results;
 
     @Override
     public List<Integer> reduce() {
-        int benchmarkDataLength = benchmarks.get(0).getData().length * 8;
-        if (benchmarkDataLength < sizeOfNewParamList) {
+        int benchmarkDataLength = benchmarks.get(0).getImage().getDataSize();
+        if (benchmarkDataLength < getParamsCount(benchmarkDataLength, nParam)) {
             throw new IllegalArgumentException("n cannot be greater than num of params");
         }
-        Set<Integer> paramsToRemoveIndexes = new HashSet<>();
+        Set<Integer> selectedParams = new HashSet<>();
         LOG.debug("Starting reduce..." + new Date());
-        while (paramsToRemoveIndexes.size() < sizeOfNewParamList && sizeOfNewParamList > 0) {
-            LOG.debug("Current number of params: " + paramsToRemoveIndexes.size());
-            LOG.debug("Current params list: " + paramsToRemoveIndexes);
+        TrainSetFactory trainSetFactory = new TrainSetFactory(PROTOTYPE_PER_PATTERN_SIZE);
+        List<Pattern> trainSet = trainSetFactory.generateTrainSet(benchmarks, distortionRate);
+        TestSetFactory testSetFactory = new TestSetFactory(PROTOTYPE_PER_PATTERN_SIZE);
+        Map<Pattern, List<Pattern>> testSet = testSetFactory.newTestSet(benchmarks, distortionRate);
+
+        while (selectedParams.size() < getParamsCount(benchmarkDataLength, nParam)) {
+            LOG.debug("Current number of params: " + selectedParams.size());
+            LOG.debug("Current params list: " + selectedParams);
             Map<Integer, Double> delMap = new HashMap<>();
+            ErrorAnalyser errorAnalyser = new ErrorAnalyser(benchmarks);
             for(int i=0; i < benchmarkDataLength; i++) {
-                if (!paramsToRemoveIndexes.contains(i)) {
+                if (!selectedParams.contains(i)) {
                     delMap.put(i, 0.0);
-                    List<Pattern> modifiedBenchmarks = getModifiedBenchmarks(benchmarks, paramsToRemoveIndexes, i);
-                    List<Pattern> newTrainSet = Reduce.reduceTrainSet(trainSet, new ArrayList<>(paramsToRemoveIndexes));
-                    ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, newTrainSet, modifiedBenchmarks), modifiedBenchmarks);
-                    errorAnalyser.setDistortionOffset(0);
-                    delMap.put(i, delMap.get(i) + errorAnalyser.analise(distortionRate));
+                    List<Integer> integerList = processResults(selectedParams, benchmarkDataLength, null);
+                    if(isVisualizationEnabled) {
+                        progressController.changeImage(benchmarks, integerList, i);
+                    }
+                    Recognizer recognizer = new KNN(3, trainSet, benchmarks);
+                    integerList = processResults(selectedParams, benchmarkDataLength, i);
+                    recognizer.setAttributesToIgnore(integerList);
+
+                    delMap.put(i, delMap.get(i) + errorAnalyser.analise(recognizer, testSet));
+
                     LOG.debug("Param: " + i + " gives " + delMap.get(i) + " errors");
                 }
-                updateMessage("Attributes removed: " + paramsToRemoveIndexes.size() + " Scanning attribute: " + i);
+                updateMessage(progressMessage() + selectedParams.size() + " Scanning attribute: " + i);
             }
             int newIndex = detectMin(delMap);
-            paramsToRemoveIndexes.add(newIndex);
+            selectedParams.add(newIndex);
             LOG.debug("New param found with index: " + newIndex + "! Error rate: " + delMap.get(newIndex));
-            updateProgress(paramsToRemoveIndexes.size(), sizeOfNewParamList);
+            updateProgress(selectedParams.size(), getParamsCount(benchmarkDataLength, nParam));
         }
-        if(sizeOfNewParamList <= 0) {
-            updateProgress(sizeOfNewParamList, sizeOfNewParamList);
+        updateMessage("Scanning finished!");
+        List<Integer> integerList = processResults(selectedParams, benchmarkDataLength, null);
+        progressController.changeImage(benchmarks, integerList, null);
+        LOG.debug("Reduce finished resulted set: " + selectedParams);
+        results = processResults(selectedParams, benchmarkDataLength, null);
+        if(nParam <= 0) {
+            updateProgress(nParam, nParam);
         }
-        LOG.debug("Reduce finished resulted set: " + paramsToRemoveIndexes);
-        results = new ArrayList<>(paramsToRemoveIndexes);
+        succeeded();
         return results;
     }
 
@@ -63,12 +85,11 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
         return results;
     }
 
-    @Override
-    public void setTrainSet(List<Pattern> trainSet) {
-        this.trainSet = trainSet;
-    }
+    protected abstract int getParamsCount(int totalParams, int nParam);
 
-    protected abstract List<Pattern> getModifiedBenchmarks(List<Pattern> benchmarks, Set<Integer> oldParams, int newParam);
+    protected  abstract List<Integer> processResults(Set<Integer> selectedIndex, int totalResults, Integer newIndex);
+
+    protected abstract String progressMessage();
 
     private Integer detectMin(Map<Integer, Double> map) {
         Double min = Collections.min(map.values());
@@ -86,8 +107,8 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
     }
 
     @Override
-    public void setSizeOfNewParamList(int sizeOfNewParamList) {
-        this.sizeOfNewParamList = sizeOfNewParamList;
+    public void setnParam(int nParam) {
+        this.nParam = nParam;
     }
 
     @Override
@@ -95,14 +116,17 @@ public abstract class AbstractSearchReduce extends Task<List<Pattern>> implement
         this.distortionRate = distortionRate;
     }
 
-    @Override
-    public String toString() {
-        return "Del";
+    public void setProgressController(ProgressController progressController) {
+        this.progressController = progressController;
     }
 
     @Override
     protected List<Pattern> call() throws Exception {
         reduce();
         return  null;
+    }
+
+    public void setVisualizationEnabled(boolean isVisualizationEnabled) {
+        this.isVisualizationEnabled = isVisualizationEnabled;
     }
 }

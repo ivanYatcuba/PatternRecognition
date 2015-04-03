@@ -15,12 +15,11 @@ public class SolutionTreeBagging implements Recognizer {
     private List<Pattern> trainSet;
     private List<CFourFive> forest;
 
-    private int attributesCount;
+    private List<Integer> attributesToIgnore = new ArrayList<>();
 
-    public SolutionTreeBagging(List<Pattern> benchmarks, List<Pattern> trainSet, int attributesCount) {
+    public SolutionTreeBagging(List<Pattern> benchmarks, List<Pattern> trainSet) {
         this.benchmarks = benchmarks;
         this.trainSet = trainSet;
-        this.attributesCount = attributesCount;
     }
 
     @Override
@@ -48,7 +47,8 @@ public class SolutionTreeBagging implements Recognizer {
     public void init(){
         forest = new ArrayList<>();
         for(int i=0; i<CLASSIFIER_COUNT; i++){
-            CFourFive cFourFive = new CFourFive(benchmarks, generateSubList(trainSet), attributesCount);
+            CFourFive cFourFive = new CFourFive(benchmarks, generateSubList(trainSet));
+            cFourFive.setAttributesToIgnore(attributesToIgnore);
             cFourFive.init();
             forest.add(cFourFive);
         }
@@ -67,7 +67,18 @@ public class SolutionTreeBagging implements Recognizer {
     }
 
     @Override
+    public List<Pattern> getTrainSet() {
+        return trainSet;
+    }
+
+    @Override
     public String toString() {
         return "Solution Tree Bagging";
     }
+
+    @Override
+    public void setAttributesToIgnore(List<Integer> indexes) {
+        attributesToIgnore = indexes;
+    }
+
 }

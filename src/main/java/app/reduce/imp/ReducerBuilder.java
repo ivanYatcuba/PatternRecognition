@@ -1,6 +1,7 @@
 package app.reduce.imp;
 
 import app.backend.model.Pattern;
+import app.controller.impl.ProgressController;
 import app.reduce.Reduce;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class ReducerBuilder {
     }
 
     public ReducerBuilder setSizeOfNewParamList(int sizeOfNewParamList) {
-        reduce.setSizeOfNewParamList(sizeOfNewParamList);
+        reduce.setnParam(sizeOfNewParamList);
         return this;
     }
 
@@ -32,10 +33,16 @@ public class ReducerBuilder {
         return this;
     }
 
-    public ReducerBuilder setTrainSet(List<Pattern> trainSet) {
-        reduce.setTrainSet(trainSet);
+    public ReducerBuilder setProgressController(ProgressController controller) {
+        reduce.setProgressController(controller);
         return this;
     }
+
+    public ReducerBuilder setVisulaization(boolean visualization) {
+        reduce.setVisualizationEnabled(visualization);
+        return this;
+    }
+
 
     public Reduce build() {
         return reduce;

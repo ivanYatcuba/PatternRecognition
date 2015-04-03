@@ -9,6 +9,8 @@ import app.recognition.impl.CFourFive;
 import app.recognition.impl.KNN;
 import app.recognition.impl.SolutionTreeBagging;
 import app.util.RecognizerFactory;
+import app.util.TestSetFactory;
+import app.util.TrainSetFactory;
 import app.util.pattern.Distorter;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -19,12 +21,15 @@ import org.springframework.stereotype.Controller;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 @Controller
 public class StatisticController extends AbstractFxmlController implements Initializable {
 
     public static final int KNN_K = 3;
+    private static final int PROTOTYPE_PER_PATTERN_SIZE = 10;
 
     @Autowired
     private PatternService patternService;
@@ -35,30 +40,36 @@ public class StatisticController extends AbstractFxmlController implements Initi
     private LineChart<Integer, Double> activityChart;
 
     private List<Pattern> patterns;
-    private List<Pattern> trainSet;
 
     public void buildStatistic() {
         activityChart.getData().retainAll();
-        patterns = patternService.getBenchmarks();
-        trainSet = patternService.getAll();
+
+        TrainSetFactory trainSetFactory = new TrainSetFactory(PROTOTYPE_PER_PATTERN_SIZE);
+
+        Random rand = new Random();
+        int distortion = rand.nextInt((30) + 1);
+        List<Pattern> trainSet = trainSetFactory.generateTrainSet(patterns, distortion);
+
         if(!patterns.isEmpty()) {
-            int attributesLength = patterns.get(0).getBitData().length;
             KNN knn = recognizerFactory.getKNN(KNN_K, trainSet, patterns);
-            CFourFive cFourFive = recognizerFactory.getCFourFive(patterns, trainSet, attributesLength);
-            SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(patterns, trainSet, attributesLength);
-            activityChart.getData().add(buildSeries(knn, "KNN"));
-            activityChart.getData().add(buildSeries(cFourFive, "C4.5"));
-            activityChart.getData().add(buildSeries(solutionTreeBagging, "Bagging"));
+            CFourFive cFourFive = recognizerFactory.getCFourFive(patterns, trainSet);
+            SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(patterns, trainSet);
+
+            activityChart.getData().add(buildSeries("KNN", knn));
+            activityChart.getData().add(buildSeries("C4.5", cFourFive));
+            activityChart.getData().add(buildSeries("Bagging", solutionTreeBagging));
         }
     }
 
-    private XYChart.Series<Integer, Double> buildSeries(Recognizer recognizer, String seriesName) {
+    private XYChart.Series<Integer, Double> buildSeries( String seriesName, Recognizer recognizer) {
         XYChart.Series<Integer, Double> series = new XYChart.Series<>();
         series.setName(seriesName);
         int distortionRate = 0;
-        ErrorAnalyser errorAnalyser = new ErrorAnalyser(recognizer, patterns);
         while (distortionRate <= 100) {
-            series.getData().add(new XYChart.Data(distortionRate, errorAnalyser.analise(distortionRate)));
+            TestSetFactory testSetFactory = new TestSetFactory(PROTOTYPE_PER_PATTERN_SIZE);
+            Map<Pattern, List<Pattern>> testSet = testSetFactory.newTestSet(patterns, distortionRate);
+            ErrorAnalyser errorAnalyser = new ErrorAnalyser(patterns);
+            series.getData().add(new XYChart.Data<>(distortionRate, errorAnalyser.analise(recognizer, testSet)));
             distortionRate += 5;
         }
         return series;
@@ -66,6 +77,7 @@ public class StatisticController extends AbstractFxmlController implements Initi
 
     @Override
     public void initialize(final URL url, final ResourceBundle resourceBundle) {
+        patterns = patternService.getBenchmarks();
         buildStatistic();
     }
 }

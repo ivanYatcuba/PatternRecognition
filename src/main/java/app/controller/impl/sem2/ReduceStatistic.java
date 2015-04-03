@@ -70,9 +70,9 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
 
             @Override
             protected Void call() throws Exception {
-                List<Pattern> benchmarks = patternService.getBenchmarks();
-                List<Pattern> trainSet = ErrorAnalyser.newTrainSet(benchmarks, (int) distortionRate.getValue(), 0);
-                Map<Pattern, List<Pattern>> testSet = ErrorAnalyser.newTestSet(benchmarks, (int)distortionRate.getValue(), 0);
+               // List<Pattern> benchmarks = patternService.getBenchmarks();
+                //List<Pattern> trainSet = ErrorAnalyser.newTrainSet(benchmarks, (int) distortionRate.getValue(), 0);
+               // Map<Pattern, List<Pattern>> testSet = ErrorAnalyser.newTestSet(benchmarks, (int)distortionRate.getValue(), 0);
 
                 List<Class<? extends Reduce>> classes = Arrays.asList(DelReduce.class, AddReduce.class);
                 int maxOverview = dataSize*2;
@@ -82,15 +82,15 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
                     series.setName(r.getSimpleName());
                     for(int i=1; i<dataSize; i++) {
                         ReducerBuilder reducerBuilder = new ReducerBuilder(r);
-                        reducerBuilder.setBenchmarks(benchmarks).setDistortionRate((int)distortionRate.getValue()).
-                                setSizeOfNewParamList(i).setTrainSet(trainSet);
+                   //     reducerBuilder.setBenchmarks(benchmarks).setDistortionRate((int)distortionRate.getValue()).
+                     //           setSizeOfNewParamList(i).setTrainSet(trainSet);
                         Reduce reduce = reducerBuilder.build();
                         List<Integer> modifiedPatterns = reduce.reduce();
 
-                        List<Pattern> newTrainSet = Reduce.reduceTrainSet(trainSet, modifiedPatterns);
-                        Map<Pattern, List<Pattern>> newTestSet = Reduce.reduceTestSet(testSet, modifiedPatterns);
-                        List<Pattern> newBenchmarks = new ArrayList<>(newTestSet.keySet());
-                        series.getData().add(buildSeries(i, newBenchmarks, newTrainSet, newTestSet));
+                      //  List<Pattern> newTrainSet = Reduce.reduceTrainSet(trainSet, modifiedPatterns);
+                      //  Map<Pattern, List<Pattern>> newTestSet = Reduce.reduceTestSet(testSet, modifiedPatterns);
+                       // List<Pattern> newBenchmarks = new ArrayList<>(newTestSet.keySet());
+                       // series.getData().add(buildSeries(i, newBenchmarks, newTrainSet, newTestSet));
                         currentOverview++;
                         updateProgress(currentOverview, maxOverview-1);
                     }
@@ -113,8 +113,8 @@ public class ReduceStatistic extends AbstractFxmlController implements Initializ
     }
 
     private XYChart.Data<Integer, Double> buildSeries(int paramCount, List<Pattern> patterns, List<Pattern> trainSet, Map<Pattern, List<Pattern>> testSet) {
-        ErrorAnalyser errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, trainSet, patterns.get(0).getData().length), patterns);
-        return new XYChart.Data<>(paramCount, errorAnalyser.analise((int)distortionRate.getValue(), trainSet, testSet));
+        //ErrorAnalyser errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, trainSet), patterns);
+        return null;//new XYChart.Data<>(paramCount, errorAnalyser.analise((int)distortionRate.getValue(), trainSet, testSet));
     }
 
     private ProgressController getProgressWindow() {

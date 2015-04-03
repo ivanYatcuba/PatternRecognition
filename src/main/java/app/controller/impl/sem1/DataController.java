@@ -4,6 +4,7 @@ import app.backend.model.Pattern;
 import app.backend.service.PatternService;
 import app.controller.impl.AbstractFxmlController;
 import app.controller.impl.sem2.SecondPartController;
+import app.util.ImageWrapper;
 import app.util.pattern.Distorter;
 import app.util.pattern.ImagePatternLoader;
 import javafx.beans.value.ChangeListener;
@@ -71,16 +72,9 @@ public class DataController extends AbstractFxmlController implements Initializa
             File imgPath = new File(file.getPath());
             BufferedImage bufferedImage;
             try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
                 bufferedImage = ImageIO.read(imgPath);
-                ImageIO.write(bufferedImage, "bmp", baos);
-                baos.flush();
-
-                pattern.setData(baos.toByteArray());
-                baos.close();
-
+                pattern.setImage(new ImageWrapper(bufferedImage));
                 patternService.save(pattern);
-
                 patterns.getItems().add(pattern);
                 patterns.getSelectionModel().select(pattern);
             } catch (IOException e) {

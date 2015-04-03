@@ -2,7 +2,6 @@ package app.controller.impl.sem1;
 
 import app.backend.model.Pattern;
 import app.backend.service.PatternService;
-import app.controller.FxmlController;
 import app.controller.impl.AbstractFxmlController;
 import app.recognition.Recognizer;
 import app.recognition.impl.CFourFive;
@@ -14,7 +13,6 @@ import app.util.RecognizerFactory;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
@@ -59,10 +57,9 @@ public class RecognitionController extends AbstractFxmlController implements  In
             patterns.setItems(FXCollections.observableArrayList(benchmarks));
             patterns.getSelectionModel().select(0);
             List<Pattern> trainSet = patternService.getAll();
-            int attributeLength = patterns.getSelectionModel().getSelectedItem().getBitData().length;
             KNN knn = recognizerFactory.getKNN(KNN_K, trainSet, benchmarks);
-            CFourFive cFourFive = recognizerFactory.getCFourFive(benchmarks, trainSet, attributeLength);
-            SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(benchmarks, trainSet, attributeLength);
+            CFourFive cFourFive = recognizerFactory.getCFourFive(benchmarks, trainSet);
+            SolutionTreeBagging solutionTreeBagging = recognizerFactory.getSolutionTreeBagging(benchmarks, trainSet);
             methods.setItems(FXCollections.observableArrayList(Arrays.asList(knn, cFourFive, solutionTreeBagging)));
             methods.getSelectionModel().select(0);
             generateAndRecognize();

@@ -14,6 +14,8 @@ import app.reduce.imp.AddReduce;
 import app.reduce.imp.DelReduce;
 import app.reduce.imp.ReducerBuilder;
 import app.util.SpringFXMLLoader;
+import app.util.TestSetFactory;
+import app.util.TrainSetFactory;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -42,6 +44,7 @@ public class ReduceController extends AbstractFxmlController implements Initiali
     private static final String KNN = "KNN";
     private static final String C4_5 = "C4.5";
     private static final String SOLUTION_TREE_BAGGING = "Solution Tree Bagging";
+    private static final int PROTOTYPE_PER_PATTERN_SIZE = 10;
 
     @Autowired
     private SecondPartController secondPartController;
@@ -50,7 +53,6 @@ public class ReduceController extends AbstractFxmlController implements Initiali
     private int dataSize;
 
     List<Pattern> benchmarks;
-    List<Pattern> trainSet;
 
     @FXML
     private ComboBox<Class<? extends Reduce>> reducers;
@@ -64,6 +66,8 @@ public class ReduceController extends AbstractFxmlController implements Initiali
     private Label distLabel;
     @FXML
     private BarChart<String, Number> results;
+    @FXML
+    private CheckBox enableVisualisation;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -89,7 +93,7 @@ public class ReduceController extends AbstractFxmlController implements Initiali
         });
         reducers.setItems(FXCollections.observableArrayList(reduces));
         reducers.getSelectionModel().select(0);
-        dataSize = patternService.getDataSize()*8;
+        dataSize = patternService.getBenchmarks().get(0).getImage().getDataSize();
         propCount.setMax(dataSize);
         propCount.setMin(1);
         propCount.setValue(dataSize);
@@ -104,53 +108,54 @@ public class ReduceController extends AbstractFxmlController implements Initiali
 
         benchmarks = patternService.getBenchmarks();
         results.getYAxis().setAutoRanging(false);
+        enableVisualisation.setSelected(true);
         ((NumberAxis)results.getYAxis()).setUpperBound(100);
     }
 
     public void startReduce() {
-        trainSet = ErrorAnalyser.newTrainSet(benchmarks, (int)distortionRate.getValue(), 0);
+        results.getData().retainAll();
+        ProgressController progressController = getProgressWindow();
         ReducerBuilder reducerBuilder = new ReducerBuilder(reducers.getSelectionModel().getSelectedItem());
         reducerBuilder.setBenchmarks(patternService.getBenchmarks()).setDistortionRate((int)distortionRate.getValue()).
-                setSizeOfNewParamList(dataSize - (int)propCount.getValue()).setTrainSet(trainSet);
+                setSizeOfNewParamList(dataSize - (int)propCount.getValue()).setProgressController(progressController).
+                setVisulaization(enableVisualisation.isSelected());
         Reduce reduce = reducerBuilder.build();
         Task task = (Task)reduce;
         task.setOnSucceeded(event -> buildReduceResults(((Reduce)event.getSource()).getReduceResults()));
         Thread t = new Thread(task);
-        getProgressWindow().bind(task);
+        progressController.bind(task);
         t.start();
     }
 
-    public void buildReduceResults(List<Integer> modifiedPatterns) {
-        results.getData().retainAll();
+    public void buildReduceResults(List<Integer>  indexToIgnore) {
+        TrainSetFactory trainSetFactory = new TrainSetFactory(PROTOTYPE_PER_PATTERN_SIZE);
+        List<Pattern> trainSet = trainSetFactory.generateTrainSet(benchmarks, (int) distortionRate.getValue());
+        TestSetFactory testSetFactory = new TestSetFactory(PROTOTYPE_PER_PATTERN_SIZE);
+        Map<Pattern, List<Pattern>> testSet = testSetFactory.newTestSet(benchmarks, (int) distortionRate.getValue());
 
-        Map<Pattern, List<Pattern>> testSet = ErrorAnalyser.newTestSet(benchmarks, (int)distortionRate.getValue(), 0);
-        results.getData().add(buildSeries("Origin", benchmarks, trainSet, testSet));
-
-        List<Pattern> newTrainSet = Reduce.reduceTrainSet(trainSet, modifiedPatterns);
-        testSet = Reduce.reduceTestSet(testSet, modifiedPatterns);
-        List<Pattern> newBenchmark = new ArrayList<>(testSet.keySet());
-        results.getData().add(buildSeries("Modified", newBenchmark, newTrainSet, testSet));
+        results.getData().add(buildSeries("Origin", benchmarks, trainSet, testSet, new ArrayList<>()));
+        results.getData().add(buildSeries("Modified", benchmarks, trainSet, testSet, indexToIgnore));
 
     }
 
     private XYChart.Series<String, Number> buildSeries(String name, List<Pattern> patterns, List<Pattern> trainSet,
-                                                       Map<Pattern, List<Pattern>> testSet) {
-        int distortionRate = (int) this.distortionRate.getValue();
+                                                       Map<Pattern, List<Pattern>> testSet, List<Integer> indexToIgnore) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        int dataSize = patterns.get(0).getBitData().length;
-        int errorSize;
         series.setName(name);
 
-        ErrorAnalyser errorAnalyser = new ErrorAnalyser(new KNN(3, null, patterns), patterns);
-        errorAnalyser.setDistortionOffset(0);
-        series.getData().add(new XYChart.Data<>(KNN,  errorAnalyser.analise(distortionRate, trainSet, testSet)));
+        KNN knn = new KNN(3, trainSet, patterns);
+        knn.setAttributesToIgnore(indexToIgnore);
+        ErrorAnalyser errorAnalyser = new ErrorAnalyser(patterns);
+        series.getData().add(new XYChart.Data<>(KNN,  errorAnalyser.analise(knn, testSet)));
 
 
-        errorAnalyser = new ErrorAnalyser(new CFourFive(patterns, null, dataSize), patterns);
-        series.getData().add(new XYChart.Data<>(C4_5, errorAnalyser.analise(distortionRate, trainSet, testSet)));
+        CFourFive cFourFive = new CFourFive(patterns, trainSet);
+        cFourFive.setAttributesToIgnore(indexToIgnore);
+        series.getData().add(new XYChart.Data<>(C4_5, errorAnalyser.analise(cFourFive, testSet)));
 
-        errorAnalyser = new ErrorAnalyser(new SolutionTreeBagging(patterns, null, dataSize), patterns);
-        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, errorAnalyser.analise(distortionRate, trainSet, testSet)));
+        SolutionTreeBagging solutionTreeBagging = new SolutionTreeBagging(patterns, trainSet);
+        solutionTreeBagging.setAttributesToIgnore(indexToIgnore);
+        series.getData().add(new XYChart.Data<>(SOLUTION_TREE_BAGGING, errorAnalyser.analise(solutionTreeBagging, testSet)));
         return  series;
     }
 

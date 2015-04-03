@@ -2,9 +2,9 @@ package app.recognition.impl;
 
 import app.backend.model.Pattern;
 import app.recognition.Recognizer;
+import app.util.ImageWrapper;
 import app.util.tree.AbstractNode;
 import app.util.tree.BTree;
-import app.util.pattern.BitUtil;
 
 import java.util.*;
 
@@ -14,14 +14,19 @@ public class CFourFive implements Recognizer {
     private List<Pattern> trainSet;
     private int attributesCount;
 
+    private List<Integer> attributesToIgnore = new ArrayList<>();
+
     private BTree<Pattern> classificationTree;
 
     private int frequencyOffset = 0;
 
-    public CFourFive(List<Pattern> benchmarks, List<Pattern> trainSet, int attributesCount) {
+    public CFourFive(List<Pattern> benchmarks, List<Pattern> trainSet) {
+        if(benchmarks == null || trainSet == null) {
+            throw new IllegalArgumentException();
+        }
         this.benchmarks = benchmarks;
         this.trainSet = trainSet;
-        this.attributesCount = attributesCount;
+        this.attributesCount = benchmarks.get(0).getImage().getDataSize();
     }
 
     @Override
@@ -33,7 +38,7 @@ public class CFourFive implements Recognizer {
         if(currentNode.getData() != null){
             return  currentNode.getData();
         }
-        if(pattern.getBitData()[currentNode.bitId]){
+        if(pattern.getPixel(currentNode.bitId) == ImageWrapper.WHITE){
             return recognizeR((ClassificationNode)currentNode.getrNode(), pattern);
         }else {
             return recognizeR((ClassificationNode)currentNode.getlNode(), pattern);
@@ -42,11 +47,10 @@ public class CFourFive implements Recognizer {
 
     @Override
     public void init(){
-        classificationTree = new BTree(new ClassificationNode());
+        classificationTree = new BTree<>(new ClassificationNode());
         if(trainSet.size() > attributesCount) {
             frequencyOffset = trainSet.size() - (attributesCount );
         }
-
         buildTreeR((ClassificationNode) classificationTree.getRoot(), trainSet);
     }
 
@@ -61,15 +65,21 @@ public class CFourFive implements Recognizer {
         Map<Long, ListTuple<Pattern>> attributeLists = new HashMap<>();
         double info = getInfo(currentSet);
         for(int i = 0; i < attributesCount; i++){
+            if( !attributesToIgnore.contains(i)) {
                 List<Pattern> lList = new ArrayList<>();
                 List<Pattern> rList = new ArrayList<>();
                 for(Pattern p: currentSet) {
-                    if(p.getBitData()[i]){rList.add(p);}
-                    else{lList.add(p);}
+                    if(p.getPixel(i) == ImageWrapper.WHITE){
+                        rList.add(p);
+                    }
+                    else{
+                        lList.add(p);
+                    }
                 }
                 long attributeIndex = (long)(i);
                 attributeLists.put(attributeIndex, new ListTuple<>(lList, rList));
                 gainMap.put(info - getInfoX(Arrays.asList(lList, rList), currentSet.size()), attributeIndex);
+            }
         }
         double maxGain = Collections.max(gainMap.keySet());
         if(maxGain == 0) {
@@ -154,7 +164,18 @@ public class CFourFive implements Recognizer {
     }
 
     @Override
+    public List<Pattern> getTrainSet() {
+        return trainSet;
+    }
+
+    @Override
     public String toString() {
         return "C4.5";
     }
+
+    @Override
+    public void setAttributesToIgnore(List<Integer> indexes) {
+        attributesToIgnore = indexes;
+    }
+
 }

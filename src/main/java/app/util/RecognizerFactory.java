@@ -15,14 +15,14 @@ public class RecognizerFactory {
         return new KNN(k, trainSet, benchmarks);
     }
 
-    public CFourFive getCFourFive(List<Pattern> benchmarks, List<Pattern> trainSet, int attributesCount) {
-        CFourFive cFourFive = new CFourFive(benchmarks, trainSet, attributesCount);
+    public CFourFive getCFourFive(List<Pattern> benchmarks, List<Pattern> trainSet) {
+        CFourFive cFourFive = new CFourFive(benchmarks, trainSet);
         cFourFive.init();
         return cFourFive;
     }
 
-    public SolutionTreeBagging getSolutionTreeBagging(List<Pattern> benchmarks, List<Pattern> trainSet, int attributesCount) {
-        SolutionTreeBagging solutionTreeBagging = new SolutionTreeBagging(benchmarks, trainSet, attributesCount);
+    public SolutionTreeBagging getSolutionTreeBagging(List<Pattern> benchmarks, List<Pattern> trainSet) {
+        SolutionTreeBagging solutionTreeBagging = new SolutionTreeBagging(benchmarks, trainSet);
         solutionTreeBagging.init();
         return solutionTreeBagging;
     }

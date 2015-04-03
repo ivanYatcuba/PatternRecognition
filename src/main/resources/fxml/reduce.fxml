@@ -22,5 +22,6 @@
             <NumberAxis side="LEFT" />
          </yAxis>
       </BarChart>
+      <CheckBox fx:id="enableVisualisation" layoutX="216.0" layoutY="66.0" mnemonicParsing="false" text="Enable Visualization" />
    </children>
 </Pane>
