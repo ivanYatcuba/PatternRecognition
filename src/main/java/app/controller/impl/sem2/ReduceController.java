@@ -91,9 +91,14 @@ public class ReduceController extends AbstractFxmlController implements Initiali
                 throw new IllegalArgumentException();
             }
         });
+        benchmarks = patternService.getBenchmarks();
         reducers.setItems(FXCollections.observableArrayList(reduces));
         reducers.getSelectionModel().select(0);
-        dataSize = patternService.getBenchmarks().get(0).getImage().getDataSize();
+        if(!benchmarks.isEmpty()) {
+            dataSize = benchmarks.get(0).getImage().getDataSize();
+        } else {
+            dataSize = 1;
+        }
         propCount.setMax(dataSize);
         propCount.setMin(1);
         propCount.setValue(dataSize);
@@ -106,7 +111,7 @@ public class ReduceController extends AbstractFxmlController implements Initiali
         propLabel.textProperty().setValue(NEW_PROPERTY_COUNT + String.valueOf((int) propCount.getValue()));
         distLabel.textProperty().setValue(DISTORTION_RATE + String.valueOf((int) distortionRate.getValue()));
 
-        benchmarks = patternService.getBenchmarks();
+
         results.getYAxis().setAutoRanging(false);
         enableVisualisation.setSelected(true);
         ((NumberAxis)results.getYAxis()).setUpperBound(100);

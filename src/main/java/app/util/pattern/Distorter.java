@@ -22,7 +22,6 @@ public class Distorter {
                     }
                 }
             }
-            nP.setPixel(0, 0, ImageWrapper.RED);
             nP.setName(p.getName()+"_"+i);
             nP.setBenchmark(false);
             nP.setParentId(p.getId());

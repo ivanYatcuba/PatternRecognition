@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.embed.swing.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controller.impl.sem2.ClusterController">
+   <children>
+      <ComboBox fx:id="metricComboBox" layoutX="23.0" layoutY="40.0" prefWidth="150.0" />
+      <ComboBox fx:id="linkageComboBox" layoutX="226.0" layoutY="40.0" prefWidth="150.0" />
+      <Button fx:id="start" layoutX="446.0" layoutY="32.0" mnemonicParsing="false" onAction="#startCluster" prefHeight="34.0" prefWidth="79.0" text="Button" />
+      <Label layoutX="25.0" layoutY="15.0" text="Metric:" />
+      <Label layoutX="230.0" layoutY="15.0" text="Linkage:" />
+      <StackPane fx:id="setContent" layoutX="8.0" layoutY="90.0" prefHeight="301.0" prefWidth="585.0">
+         <children>
+            <SwingNode fx:id="dendrogram" />
+         </children>
+      </StackPane>
+      <Separator layoutX="5.0" layoutY="83.0" prefHeight="3.0" prefWidth="591.0" />
+   </children>
+</Pane>

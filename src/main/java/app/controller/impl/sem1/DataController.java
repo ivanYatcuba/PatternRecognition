@@ -19,6 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -68,7 +69,7 @@ public class DataController extends AbstractFxmlController implements Initializa
 
             Pattern pattern = new Pattern();
             pattern.setBenchmark(true);
-            pattern.setName(file.getName());
+            pattern.setName(FilenameUtils.removeExtension(file.getName()));
             File imgPath = new File(file.getPath());
             BufferedImage bufferedImage;
             try {
@@ -78,6 +79,7 @@ public class DataController extends AbstractFxmlController implements Initializa
                 patterns.getItems().add(pattern);
                 patterns.getSelectionModel().select(pattern);
             } catch (IOException e) {
+                e.printStackTrace();
                 System.out.println("Error =(");
             }
         }

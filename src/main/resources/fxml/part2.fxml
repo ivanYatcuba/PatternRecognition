@@ -14,5 +14,10 @@
             <fx:include fx:id="reduce" source="reduce.fxml"/>
         </content>
       </Tab>
+       <Tab closable="false" text="Cluster">
+           <content>
+               <fx:include fx:id="cluster" source="cluster.fxml"/>
+           </content>
+       </Tab>
    </tabs>
 </TabPane>
