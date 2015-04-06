@@ -8,14 +8,15 @@ import app.cluster.linkage.CompleteLinkage;
 import app.cluster.linkage.Linkage;
 import app.cluster.linkage.SingleLinkage;
 import app.cluster.metric.EuclideanMetric;
+import app.cluster.metric.ManhattanMetric;
 import app.cluster.metric.Metric;
+import app.cluster.metric.SquaredEuclideanMetric;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.StackPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,7 +44,7 @@ public class ClusterController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        metricComboBox.setItems(FXCollections.observableArrayList(new EuclideanMetric()));
+        metricComboBox.setItems(FXCollections.observableArrayList(new EuclideanMetric(), new ManhattanMetric(), new SquaredEuclideanMetric()));
         linkageComboBox.setItems(FXCollections.observableArrayList(new SingleLinkage(), new AverageLinkage(), new CompleteLinkage()));
         metricComboBox.getSelectionModel().select(0);
         linkageComboBox.getSelectionModel().select(0);
